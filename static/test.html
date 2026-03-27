@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetailGPT — Test UI</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f0f2f5;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .header h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+  .header .session-id {
+    font-size: 11px;
+    color: #8888aa;
+    font-family: monospace;
+    margin-left: auto;
+  }
+  .btn-new {
+    background: #e94560;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-new:hover { background: #c73652; }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Chat Panel ── */
+  .chat-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-right: 1px solid #e0e0e0;
+    min-width: 0;
+  }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── Bubbles ── */
+  .row {
+    display: flex;
+    flex-direction: column;
+  }
+  .row.customer { align-items: flex-end; }
+  .row.bot      { align-items: flex-start; }
+
+  .bubble {
+    max-width: 68%;
+    padding: 10px 14px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .row.customer .bubble {
+    background: #2563eb;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .row.bot .bubble {
+    background: #f1f3f5;
+    color: #1a1a2e;
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.handover {
+    background: #fff3cd;
+    border: 1px solid #f59e0b;
+    color: #78350f;
+    max-width: 80%;
+  }
+  .bubble.terminal {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+    color: #064e3b;
+    max-width: 80%;
+  }
+
+  .label {
+    font-size: 10px;
+    color: #888;
+    margin-bottom: 3px;
+    padding: 0 4px;
+  }
+  .row.customer .label { text-align: right; }
+
+  /* ── Options ── */
+  .options-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    max-width: 72%;
+  }
+  .opt-btn {
+    background: #fff;
+    border: 1.5px solid #2563eb;
+    color: #2563eb;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .opt-btn:hover { background: #2563eb; color: #fff; }
+  .opt-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── Upload card ── */
+  .upload-card {
+    background: #fffbeb;
+    border: 1.5px solid #f59e0b;
+    border-radius: 12px;
+    padding: 14px 16px;
+    max-width: 72%;
+    margin-top: 8px;
+  }
+  .upload-card .uc-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #78350f;
+    margin-bottom: 8px;
+  }
+  .upload-card .uc-meta {
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+  .upload-card .uc-meta span {
+    display: inline-block;
+    background: #fde68a;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-right: 4px;
+    font-weight: 500;
+  }
+  .btn-upload-done {
+    background: #f59e0b;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-upload-done:hover { background: #d97706; }
+  .btn-upload-done:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── Handover summary ── */
+  .handover-card {
+    background: #fef2f2;
+    border: 1.5px solid #ef4444;
+    border-radius: 12px;
+    padding: 14px 16px;
+    max-width: 80%;
+    margin-top: 8px;
+  }
+  .handover-card .hc-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .handover-card .hc-reason {
+    font-size: 11px;
+    color: #b91c1c;
+    font-family: monospace;
+    margin-bottom: 8px;
+  }
+  .handover-card .hc-summary {
+    font-size: 13px;
+    color: #450a0a;
+    line-height: 1.6;
+  }
+
+  /* ── Input area ── */
+  .input-area {
+    padding: 12px 16px;
+    border-top: 1px solid #e8e8e8;
+    display: flex;
+    gap: 8px;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .input-area input {
+    flex: 1;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .input-area input:focus { border-color: #2563eb; }
+  .input-area input:disabled { background: #f9f9f9; color: #aaa; }
+  .btn-send {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-send:hover { background: #1d4ed8; }
+  .btn-send:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── Typing indicator ── */
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px;
+    background: #f1f3f5;
+    border-radius: 16px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+  }
+  .typing span {
+    width: 7px; height: 7px;
+    background: #9ca3af;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* ── Debug Panel ── */
+  .debug-panel {
+    width: 320px;
+    flex-shrink: 0;
+    background: #16213e;
+    color: #c9d1d9;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .debug-panel .dp-section {
+    border-bottom: 1px solid #2d3748;
+    padding: 12px 14px;
+    overflow-y: auto;
+  }
+  .debug-panel .dp-section:last-child { border-bottom: none; flex: 1; overflow-y: auto; }
+  .dp-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+    margin-bottom: 8px;
+  }
+  .dp-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 3px 0;
+    gap: 8px;
+  }
+  .dp-key { color: #8b949e; flex-shrink: 0; }
+  .dp-val {
+    color: #e6edf3;
+    font-family: monospace;
+    text-align: right;
+    word-break: break-all;
+  }
+  .dp-val.green  { color: #3fb950; }
+  .dp-val.yellow { color: #e3b341; }
+  .dp-val.red    { color: #f85149; }
+  .dp-val.blue   { color: #79c0ff; }
+  .dp-val.dim    { color: #6b7280; }
+
+  .conf-bar-wrap {
+    height: 4px;
+    background: #2d3748;
+    border-radius: 2px;
+    margin: 4px 0 8px;
+    overflow: hidden;
+  }
+  .conf-bar {
+    height: 100%;
+    background: #3fb950;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .entities-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .entity-tag {
+    background: #2d3748;
+    color: #79c0ff;
+    font-size: 11px;
+    font-family: monospace;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  pre.raw {
+    font-size: 10px;
+    font-family: monospace;
+    color: #8b949e;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    gap: 8px;
+    user-select: none;
+  }
+  .empty-state svg { opacity: 0.3; }
+  .empty-state p { font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>RetailGPT — Chat Test UI</h1>
+  <button class="btn-new" onclick="newSession()">+ New Chat</button>
+  <span class="session-id" id="session-label">no session</span>
+</div>
+
+<div class="layout">
+
+  <!-- ── Chat Panel ── -->
+  <div class="chat-panel">
+    <div class="messages" id="messages">
+      <div class="empty-state" id="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <p>Type a message or click <strong>New Chat</strong> to begin</p>
+      </div>
+    </div>
+    <div class="input-area">
+      <input id="text-input" type="text" placeholder="Type a message in English, Hindi, or Hinglish…"
+             onkeydown="if(event.key==='Enter') sendText()">
+      <button class="btn-send" id="send-btn" onclick="sendText()">Send</button>
+    </div>
+  </div>
+
+  <!-- ── Debug Panel ── -->
+  <div class="debug-panel">
+
+    <div class="dp-section">
+      <div class="dp-title">NLU Output</div>
+      <div id="nlu-intent"    class="dp-row"><span class="dp-key">intent</span><span class="dp-val dim" id="v-intent">—</span></div>
+      <div id="nlu-category"  class="dp-row"><span class="dp-key">category</span><span class="dp-val dim" id="v-category">—</span></div>
+      <div id="nlu-sentiment" class="dp-row"><span class="dp-key">sentiment</span><span class="dp-val dim" id="v-sentiment">—</span></div>
+      <div id="nlu-source"    class="dp-row"><span class="dp-key">source</span><span class="dp-val dim" id="v-source">—</span></div>
+      <div id="nlu-order"     class="dp-row"><span class="dp-key">order_id</span><span class="dp-val dim" id="v-order">—</span></div>
+      <div class="dp-row"><span class="dp-key">confidence</span><span class="dp-val" id="v-conf">—</span></div>
+      <div class="conf-bar-wrap"><div class="conf-bar" id="conf-bar" style="width:0%"></div></div>
+      <div class="dp-key" style="margin-top:4px;font-size:11px;">entities</div>
+      <div class="entities-list" id="v-entities"></div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-title">Context</div>
+      <div class="dp-row"><span class="dp-key">current_flow</span><span class="dp-val blue" id="v-flow">—</span></div>
+      <div class="dp-row"><span class="dp-key">flow_step</span><span class="dp-val blue" id="v-step">—</span></div>
+      <div class="dp-row"><span class="dp-key">category</span><span class="dp-val" id="v-ctx-cat">—</span></div>
+      <div class="dp-row"><span class="dp-key">order_id</span><span class="dp-val" id="v-ctx-order">—</span></div>
+      <div class="dp-row"><span class="dp-key">turn_count</span><span class="dp-val yellow" id="v-turns">0</span></div>
+      <div class="dp-row"><span class="dp-key">negative_turns</span><span class="dp-val" id="v-neg">0</span></div>
+      <div class="dp-row"><span class="dp-key">fallback_count</span><span class="dp-val" id="v-fallback">0</span></div>
+      <div class="dp-row"><span class="dp-key">escalate</span><span class="dp-val" id="v-escalate">false</span></div>
+      <div class="dp-row"><span class="dp-key">escalate_reason</span><span class="dp-val dim" id="v-esc-reason">—</span></div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-title">Raw Response</div>
+      <pre class="raw" id="v-raw">—</pre>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let sessionId   = null;
+let context     = null;
+let transcript  = [];
+let busy        = false;
+let activeOptionGroup = null; // DOM node of latest option buttons
+
+// ── Session ────────────────────────────────────────────────────────────────
+function genId() {
+  return 'sess_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
+function newSession() {
+  sessionId  = genId();
+  context    = { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] };
+  transcript = [];
+  activeOptionGroup = null;
+
+  document.getElementById('messages').innerHTML =
+    '<div class="empty-state" id="empty-state">' +
+      '<p>Session started — say something!</p>' +
+    '</div>';
+  document.getElementById('session-label').textContent = sessionId;
+
+  setInput(true);
+  clearDebug();
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────────────
+function setInput(enabled) {
+  document.getElementById('text-input').disabled = !enabled;
+  document.getElementById('send-btn').disabled   = !enabled;
+  if (enabled) document.getElementById('text-input').focus();
+}
+
+function removeEmpty() {
+  const el = document.getElementById('empty-state');
+  if (el) el.remove();
+}
+
+function scrollBottom() {
+  const m = document.getElementById('messages');
+  m.scrollTop = m.scrollHeight;
+}
+
+// ── Add message rows ───────────────────────────────────────────────────────
+function addCustomerBubble(text) {
+  removeEmpty();
+  const row = document.createElement('div');
+  row.className = 'row customer';
+  row.innerHTML = `<div class="label">You</div><div class="bubble">${esc(text)}</div>`;
+  document.getElementById('messages').appendChild(row);
+  transcript.push({ role: 'customer', content: text });
+  scrollBottom();
+}
+
+function addTyping() {
+  removeEmpty();
+  const row = document.createElement('div');
+  row.className = 'row bot';
+  row.id = 'typing-row';
+  row.innerHTML = `<div class="label">RetailGPT</div><div class="typing"><span></span><span></span><span></span></div>`;
+  document.getElementById('messages').appendChild(row);
+  scrollBottom();
+  return row;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-row');
+  if (t) t.remove();
+}
+
+function addBotBubble(text, extraClass) {
+  const row = document.createElement('div');
+  row.className = 'row bot';
+  const cls = extraClass ? `bubble ${extraClass}` : 'bubble';
+  row.innerHTML = `<div class="label">RetailGPT</div><div class="${cls}">${esc(text)}</div>`;
+  document.getElementById('messages').appendChild(row);
+  return row;
+}
+
+function addOptions(options) {
+  disableOldOptions();
+  const wrap = document.createElement('div');
+  wrap.className = 'row bot';
+  const inner = document.createElement('div');
+  inner.className = 'options-wrap';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = opt.label;
+    btn.dataset.id = opt.id;
+    btn.onclick = () => selectOption(opt.id, opt.label, inner);
+    inner.appendChild(btn);
+  });
+  wrap.appendChild(inner);
+  document.getElementById('messages').appendChild(wrap);
+  activeOptionGroup = inner;
+  scrollBottom();
+}
+
+function addUploadCard(cfg) {
+  disableOldOptions();
+  const row = document.createElement('div');
+  row.className = 'row bot';
+  const minPh = cfg?.min_photos ?? 3;
+  const video  = cfg?.video ? 'Yes' : 'No';
+  const maxMb  = cfg?.max_size_mb ?? 20;
+  row.innerHTML = `
+    <div class="upload-card">
+      <div class="uc-title">📷 Upload Required</div>
+      <div class="uc-meta">
+        <span>Min photos: ${minPh}</span>
+        <span>Video: ${video}</span>
+        <span>Max size: ${maxMb} MB</span>
+      </div>
+      <button class="btn-upload-done" id="upload-done-btn" onclick="simulateUpload(this)">
+        ✓ Simulate Upload Complete
+      </button>
+    </div>`;
+  document.getElementById('messages').appendChild(row);
+  scrollBottom();
+}
+
+function addHandoverCard(reason, summary) {
+  const row = document.createElement('div');
+  row.className = 'row bot';
+  row.innerHTML = `
+    <div class="handover-card">
+      <div class="hc-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6 6l1.84-1.84a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 15z"/>
+        </svg>
+        Escalated to Human Agent
+      </div>
+      <div class="hc-reason">reason: ${esc(reason || '—')}</div>
+      ${summary ? `<div class="hc-summary"><strong>Agent Summary:</strong><br>${esc(summary)}</div>` : ''}
+    </div>`;
+  document.getElementById('messages').appendChild(row);
+  scrollBottom();
+}
+
+function disableOldOptions() {
+  if (activeOptionGroup) {
+    activeOptionGroup.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+    activeOptionGroup = null;
+  }
+  const uploadBtn = document.getElementById('upload-done-btn');
+  if (uploadBtn) uploadBtn.disabled = true;
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/\n/g,'<br>');
+}
+
+// ── Debug panel ────────────────────────────────────────────────────────────
+function clearDebug() {
+  ['v-intent','v-category','v-sentiment','v-source','v-order','v-conf',
+   'v-flow','v-step','v-ctx-cat','v-ctx-order','v-esc-reason']
+    .forEach(id => { const el=document.getElementById(id); if(el){el.textContent='—'; el.className='dp-val dim';} });
+  ['v-turns','v-neg','v-fallback'].forEach(id => {
+    const el=document.getElementById(id); if(el) el.textContent='0';
+  });
+  document.getElementById('v-escalate').textContent = 'false';
+  document.getElementById('v-escalate').className   = 'dp-val dim';
+  document.getElementById('conf-bar').style.width   = '0%';
+  document.getElementById('v-entities').innerHTML   = '';
+  document.getElementById('v-raw').textContent      = '—';
+}
+
+function updateDebug(data) {
+  const nlu = data.nlu;
+  const ctx = data.next_context;
+
+  if (nlu) {
+    setDpVal('v-intent',    nlu.intent,    intentColor(nlu.intent));
+    setDpVal('v-category',  nlu.category,  'blue');
+    setDpVal('v-sentiment', nlu.sentiment, sentimentColor(nlu.sentiment));
+    setDpVal('v-source',    nlu.source,    nlu.source === 'keyword' ? 'yellow' : 'dp-val');
+    setDpVal('v-order',     nlu.order_id || '—', nlu.order_id ? 'yellow' : 'dim');
+
+    const pct = Math.round((nlu.confidence || 0) * 100);
+    document.getElementById('v-conf').textContent = pct + '%';
+    document.getElementById('conf-bar').style.width = pct + '%';
+    document.getElementById('conf-bar').style.background = pct >= 75 ? '#3fb950' : pct >= 50 ? '#e3b341' : '#f85149';
+
+    const entEl = document.getElementById('v-entities');
+    entEl.innerHTML = '';
+    (nlu.entities || []).forEach(e => {
+      const t = document.createElement('span');
+      t.className = 'entity-tag';
+      t.textContent = e;
+      entEl.appendChild(t);
+    });
+  }
+
+  if (ctx) {
+    setDpVal('v-flow',      ctx.current_flow || '—', ctx.current_flow ? 'blue' : 'dim');
+    setDpVal('v-step',      ctx.flow_step    || '—', ctx.flow_step    ? 'blue' : 'dim');
+    setDpVal('v-ctx-cat',   ctx.category     || '—', 'dp-val');
+    setDpVal('v-ctx-order', ctx.order_id     || '—', ctx.order_id ? 'yellow' : 'dim');
+    document.getElementById('v-turns').textContent    = ctx.turn_count    ?? 0;
+    document.getElementById('v-neg').textContent      = ctx.negative_turns ?? 0;
+    document.getElementById('v-fallback').textContent = ctx.fallback_count ?? 0;
+  } else if (data.escalate) {
+    setDpVal('v-flow', '—', 'dim');
+    setDpVal('v-step', '—', 'dim');
+  }
+
+  const escEl = document.getElementById('v-escalate');
+  escEl.textContent  = data.escalate ? 'true' : 'false';
+  escEl.className    = 'dp-val ' + (data.escalate ? 'red' : 'green');
+  setDpVal('v-esc-reason', data.escalate_reason || '—', data.escalate_reason ? 'red' : 'dim');
+
+  document.getElementById('v-raw').textContent = JSON.stringify(data, null, 2);
+}
+
+function setDpVal(id, val, colorClass) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  el.className = 'dp-val ' + (colorClass || '');
+}
+
+function intentColor(i) {
+  if (!i || i === 'unknown') return 'dim';
+  if (i === 'request_agent') return 'red';
+  if (i.includes('issue') || i.includes('missing') || i.includes('wrong')) return 'yellow';
+  return 'green';
+}
+function sentimentColor(s) {
+  if (s === 'negative') return 'red';
+  if (s === 'positive') return 'green';
+  return 'dp-val';
+}
+
+// ── API call ───────────────────────────────────────────────────────────────
+async function callTurn(message, messageType, optionId) {
+  if (!sessionId) newSession();
+
+  busy = true;
+  setInput(false);
+
+  const body = {
+    session_id:   sessionId,
+    message:      message,
+    message_type: messageType,
+    option_id:    optionId || null,
+    context:      context || { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] },
+    transcript:   transcript,
+  };
+
+  const typingRow = addTyping();
+
+  try {
+    const res  = await fetch('/chat/turn', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json();
+    removeTyping();
+
+    // Update context from response
+    if (data.next_context) {
+      context = data.next_context;
+    }
+
+    updateDebug(data);
+    renderBotTurn(data);
+    transcript.push({ role: 'bot', content: data.message || '' });
+
+  } catch (err) {
+    removeTyping();
+    addBotBubble('⚠ Network error: ' + err.message);
+    busy = false;
+    setInput(true);
+    return;
+  }
+
+  busy = false;
+  // Only re-enable text input if we're not waiting on options/upload and not escalated
+  const lastType = document.querySelector('.options-wrap, .upload-card, .handover-card');
+  if (!lastType || document.querySelector('.handover-card')) {
+    // After handover, disable input entirely (session over)
+    const escaped = document.querySelector('.handover-card');
+    if (!escaped) setInput(true);
+  }
+}
+
+function renderBotTurn(data) {
+  const rt = data.render_type;
+
+  if (rt === 'handover') {
+    addBotBubble(data.message || 'Connecting you to an agent…');
+    addHandoverCard(data.escalate_reason, data.ai_summary);
+    // disable input — conversation is over
+    setInput(false);
+    document.getElementById('text-input').placeholder = 'Session ended — click New Chat to start over';
+    return;
+  }
+
+  if (data.message) {
+    const cls = data.terminal ? 'terminal' : '';
+    addBotBubble(data.message, cls);
+  }
+
+  if (rt === 'options' && data.options?.length) {
+    addOptions(data.options);
+    setInput(false); // wait for option selection
+    return;
+  }
+
+  if (rt === 'upload') {
+    addUploadCard(data.upload_config);
+    setInput(false); // wait for upload
+    return;
+  }
+
+  if (data.terminal) {
+    setInput(false);
+    document.getElementById('text-input').placeholder = 'Session ended — click New Chat to start over';
+    return;
+  }
+
+  setInput(true);
+}
+
+// ── Action handlers ────────────────────────────────────────────────────────
+function sendText() {
+  if (busy) return;
+  const input = document.getElementById('text-input');
+  const msg   = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  if (!sessionId) newSession();
+  addCustomerBubble(msg);
+  callTurn(msg, 'text', null);
+}
+
+function selectOption(id, label, groupEl) {
+  if (busy) return;
+  // Disable the group immediately
+  groupEl.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  activeOptionGroup = null;
+  addCustomerBubble(label);
+  callTurn(label, 'option_select', id);
+}
+
+function simulateUpload(btn) {
+  if (busy) return;
+  btn.disabled = true;
+  addCustomerBubble('(Photos uploaded)');
+  callTurn('upload_complete', 'upload_complete', 'upload_complete');
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+newSession();
+</script>
+</body>
+</html>
