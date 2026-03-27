@@ -158,6 +158,8 @@ async def chat_turn(request: ChatTurnRequest):
         options=options,
         upload_config=render.get("upload_config"),
         terminal=render.get("terminal", False),
+        ticket_raised=render.get("ticket_raised", False),
+        issue_type=render.get("issue_type"),
         escalate=False,
         escalate_reason=None,
         ai_summary=None,

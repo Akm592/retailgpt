@@ -338,6 +338,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please select the incorrectly delivered items from your order list. Then upload 3 photos 📷 of the incorrect items. (Mandatory)",
             "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "incorrect_item",
         },
         "transitions": {
             "upload_complete": "flow_items_fb_incorrect_done",
@@ -362,6 +364,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please select the missing items from your order list. Then upload photos 📷 of the items you did receive. (Mandatory)",
             "upload_config": {"required": True, "min_photos": 2, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "missing_item",
         },
         "transitions": {
             "upload_complete": "flow_items_fb_missing_done",
@@ -431,6 +435,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 photos 📷 of the items received. (Mandatory). Ticket #XXXX created — resolution within 48 hours. Retailer must respond within 24 hours. Replacement / Refund will be processed after confirmation. Auto-email will be sent.",
             "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "incorrect_or_missing_item",
         },
         "transitions": {
             "upload_complete": "flow_end",
@@ -482,6 +488,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 pictures + 1 video 📷🎥 of the items with issues. (Mandatory)",
             "upload_config": {"required": True, "min_photos": 3, "video": True, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "quality_issue_fb",
         },
         "transitions": {
             "upload_complete": "flow_quality_fb_done",
@@ -528,6 +536,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 pictures 📷 of the affected items. (Mandatory). What is the approximate value of the affected item(s)?",
             "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "quality_issue_grocery",
         },
         "transitions": {
             "upload_complete": "flow_quality_grocery_threshold_choice",
@@ -610,6 +620,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 pictures 📷 of the item. (Mandatory). Agent will verify. Refund / Replacement will be processed once verified. <Refund value / replacement> will be settled in <N> days.",
             "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "quality_issue_fashion",
         },
         "transitions": {
             "upload_complete": "flow_end",
@@ -621,6 +633,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 pictures 📷 of the item. (Mandatory). Agent will verify and process a Refund. <Refund value> will be refunded in <N> days.",
             "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "quality_issue_fashion",
         },
         "transitions": {
             "upload_complete": "flow_end",
@@ -632,6 +646,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 pictures 📷 of the damaged packaging. (Mandatory). Ticket raised with Delivery Partner — must acknowledge within 24hrs. Delivery Charge Refund will be processed.",
             "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "quality_issue_fashion_packing",
         },
         "transitions": {
             "upload_complete": "flow_end",
@@ -669,6 +685,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 pictures + 1 video 📷🎥 of the item. (Mandatory). Agent will verify. Refund / Replacement will be processed. <Refund value / replacement> will be settled in <N> days.",
             "upload_config": {"required": True, "min_photos": 3, "video": True, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "quality_issue_electronics",
         },
         "transitions": {
             "upload_complete": "flow_end",
@@ -680,6 +698,8 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "upload",
             "message": "Please upload 3 pictures + 1 video 📷🎥 of the damaged packaging. (Mandatory). Ticket raised with Delivery Partner — must acknowledge within 24hrs. Delivery Charge Refund will be processed.",
             "upload_config": {"required": True, "min_photos": 3, "video": True, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "quality_issue_electronics_packing",
         },
         "transitions": {
             "upload_complete": "flow_end",
