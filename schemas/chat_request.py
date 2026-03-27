@@ -18,7 +18,6 @@ class ChatContext(BaseModel):
     turn_count: int = 0
     negative_turns: int = 0
     fallback_count: int = 0
-    customer_id: Optional[str] = None
     open_handovers: List[OpenHandover] = Field(default_factory=list)
 
 
@@ -29,6 +28,7 @@ class TranscriptMessage(BaseModel):
 
 class ChatTurnRequest(BaseModel):
     session_id: str = Field(..., description="Session ID created by frontend")
+    customer_id: Optional[str] = Field(None, description="Customer ID — sent once per turn at top level")
     message: str = Field(..., min_length=1, max_length=2000)
     message_type: str = Field(default="text")
     option_id: Optional[str] = None
@@ -39,6 +39,7 @@ class ChatTurnRequest(BaseModel):
         json_schema_extra = {
             "example": {
                 "session_id": "sess_abc123",
+                "customer_id": "cust_xyz",
                 "message": "mera dal thanda tha",
                 "message_type": "text",
                 "option_id": None,
@@ -50,7 +51,6 @@ class ChatTurnRequest(BaseModel):
                     "turn_count": 1,
                     "negative_turns": 0,
                     "fallback_count": 0,
-                    "customer_id": "cust_xyz",
                     "open_handovers": []
                 },
                 "transcript": [

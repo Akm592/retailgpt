@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip3.12 install:*)",
+      "Bash(python3.12 -m pip install -r /home/ashish/Documents/GitHub/Reatailgpt-mvp/requirements.txt -q)",
+      "Bash(python3.12 -c \"import engine.nlu; import engine.flow_engine; import engine.escalation; import engine.summary; print\\('imports ok'\\)\")",
+      "Bash(python3.12 - << 'EOF'\nfrom engine.escalation import check_escalation\nfrom engine.nlu import RetailIntent, RetailCategory\n\nr = check_escalation\\(RetailIntent.REQUEST_AGENT, None, 0, 0, []\\)\nassert r.should_escalate == True and r.priority == \"immediate\"\n\nr = check_escalation\\(RetailIntent.PAYMENT_QUERY, None, 0, 0, []\\)\nassert r.should_escalate == True\n\nr = check_escalation\\(RetailIntent.QUALITY_ISSUE, RetailCategory.ELECTRONICS, 0, 0, []\\)\nassert r.should_escalate == True\n\nr = check_escalation\\(RetailIntent.UNKNOWN, None, 0, 3, []\\)\nassert r.should_escalate == True\n\nr = check_escalation\\(RetailIntent.QUALITY_ISSUE, RetailCategory.FB, 0, 0, []\\)\nassert r.should_escalate == False\n\nr = check_escalation\\(RetailIntent.QUALITY_ISSUE, RetailCategory.FB, 2, 0, []\\)\nassert r.should_escalate == True\n\nprint\\(\"Escalation tests passed\"\\)\nEOF)",
+      "Bash(python3.12 -c \"import app; print\\(''''app ok''''\\)\")",
+      "Bash(python3.12 -m pip install httpx -q)",
+      "Bash(python3.12 -c \":*)",
+      "Bash(python3.12 -c \"import app; print\\(''''app.py OK''''\\)\")",
+      "Bash(find /home/ashish/Documents/GitHub/Reatailgpt-mvp -type f -name *.py -o -name *.txt -o -name *.md -o -name Procfile -o -name .env*)"
+    ]
+  }
+}

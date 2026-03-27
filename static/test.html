@@ -488,8 +488,7 @@ function genId() {
 
 function newSession() {
   sessionId  = genId();
-  const customerId = document.getElementById('customer-id-input').value.trim();
-  context    = { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[], customer_id: customerId || null };
+  context    = { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] };
   transcript = [];
   activeOptionGroup = null;
 
@@ -730,12 +729,14 @@ async function callTurn(message, messageType, optionId) {
   busy = true;
   setInput(false);
 
+  const customerId = document.getElementById('customer-id-input').value.trim() || null;
   const body = {
     session_id:   sessionId,
+    customer_id:  customerId,
     message:      message,
     message_type: messageType,
     option_id:    optionId || null,
-    context:      context || { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[], customer_id: null },
+    context:      context || { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] },
     transcript:   transcript,
   };
 

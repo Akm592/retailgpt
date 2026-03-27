@@ -97,7 +97,7 @@ async def chat_turn(request: ChatTurnRequest):
         fallback_count=ctx.fallback_count,
         open_handovers=[h.dict() for h in ctx.open_handovers],
         order_id=ctx.order_id,
-        customer_id=ctx.customer_id,
+        customer_id=request.customer_id,
     )
 
     if esc.should_escalate:
@@ -158,7 +158,7 @@ async def chat_turn(request: ChatTurnRequest):
     if render.get("fetch_orders"):
         order_category = render.get("order_category", ctx.category or "")
         fetched_options, api_order_id = await fetch_order_options(
-            customer_id=ctx.customer_id or "",
+            customer_id=request.customer_id or "",
             category=order_category,
             base_url=ORDERS_API_BASE_URL,
         )
