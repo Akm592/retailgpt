@@ -47,17 +47,13 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "options",
             "message": "Sure, let me check your order status. Which category is your order?",
             "options": [
-                {"id": "fb",      "label": "🍕 Food & Beverages"},
+                {"id": "fb",      "label": "🍕 Food & Beverages (F&B)"},
                 {"id": "grocery", "label": "🛒 Grocery"},
-                {"id": "meat",    "label": "🥩 Meat / Fresh Vegetables"},
-                {"id": "other",   "label": "📦 Other Products"},
             ],
         },
         "transitions": {
-            "fb":      "flow_order_status_fb",
-            "grocery": "flow_order_status_grocery",
-            "meat":    "flow_order_status_grocery",
-            "other":   "flow_order_status_grocery",
+            "fb":      "flow_order_select_status_fb",
+            "grocery": "flow_order_select_status_grocery",
         },
     },
 
@@ -98,12 +94,12 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "message": "I can help with your cancellation. What type of order is it?",
             "options": [
                 {"id": "fb",      "label": "🍕 Food & Beverages (F&B)"},
-                {"id": "grocery", "label": "🛒 Grocery / Meat / Fresh Veg / Others"},
+                {"id": "grocery", "label": "🛒 Grocery"},
             ],
         },
         "transitions": {
-            "fb":      "flow_cancel_fb",
-            "grocery": "flow_cancel_grocery",
+            "fb":      "flow_order_select_cancel_fb",
+            "grocery": "flow_order_select_cancel_grocery",
         },
     },
 
@@ -309,12 +305,12 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "message": "I'm sorry to hear that! What type of order was it?",
             "options": [
                 {"id": "fb",      "label": "🍕 Food & Beverages (F&B)"},
-                {"id": "grocery", "label": "🛒 Grocery / Meat / Fresh Veg / Others"},
+                {"id": "grocery", "label": "🛒 Grocery"},
             ],
         },
         "transitions": {
-            "fb":      "flow_items_fb",
-            "grocery": "flow_items_grocery",
+            "fb":      "flow_order_select_items_fb",
+            "grocery": "flow_order_select_items_grocery",
         },
     },
 
@@ -449,17 +445,17 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "options",
             "message": "I'm sorry to hear about the quality issue! Which category is your order?",
             "options": [
-                {"id": "fb",          "label": "🍕 Food & Beverages"},
-                {"id": "grocery",     "label": "🛒 Grocery / Meat / Health & Wellness"},
+                {"id": "fb",          "label": "🍕 Food & Beverages (F&B)"},
+                {"id": "grocery",     "label": "🛒 Grocery"},
                 {"id": "fashion",     "label": "👗 Fashion & Apparel"},
-                {"id": "electronics", "label": "💻 Electronics & Others"},
+                {"id": "electronics", "label": "💻 Electronics"},
             ],
         },
         "transitions": {
-            "fb":          "flow_quality_fb",
-            "grocery":     "flow_quality_grocery",
-            "fashion":     "flow_quality_fashion",
-            "electronics": "flow_quality_electronics",
+            "fb":          "flow_order_select_quality_fb",
+            "grocery":     "flow_order_select_quality_grocery",
+            "fashion":     "flow_order_select_quality_fashion",
+            "electronics": "flow_order_select_quality_electronics",
         },
     },
 
@@ -1059,6 +1055,131 @@ FLOWS: Dict[str, Dict[str, Any]] = {
         "transitions": {
             "ok": "ESCALATE",
         },
+    },
+
+    # ── Order Select steps ────────────────────────────────────────────────────
+    # These steps have fetch_orders=True so app.py will call the orders API
+    # and inject the returned past orders as suggestion buttons.
+    # capture_as_order_id=True means the selected option_id is saved to ctx.order_id.
+
+    "flow_order_select_status_fb": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to check:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fb",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_order_status_fb"},
+    },
+
+    "flow_order_select_status_grocery": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to check:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "grocery",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_order_status_grocery"},
+    },
+
+    "flow_order_select_cancel_fb": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to cancel:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fb",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_cancel_fb"},
+    },
+
+    "flow_order_select_cancel_grocery": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to cancel:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "grocery",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_cancel_grocery"},
+    },
+
+    "flow_order_select_items_fb": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the item issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fb",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_items_fb"},
+    },
+
+    "flow_order_select_items_grocery": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the item issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "grocery",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_items_grocery"},
+    },
+
+    "flow_order_select_quality_fb": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the quality issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fb",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_quality_fb"},
+    },
+
+    "flow_order_select_quality_grocery": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the quality issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "grocery",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_quality_grocery"},
+    },
+
+    "flow_order_select_quality_fashion": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the quality issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fashion",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_quality_fashion"},
+    },
+
+    "flow_order_select_quality_electronics": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the quality issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "electronics",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_quality_electronics"},
     },
 
     # ── End: Survey ───────────────────────────────────────────────────────────

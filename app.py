@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,6 +11,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
 
+ORDERS_API_BASE_URL: str = os.getenv("ORDERS_API_BASE_URL", "")
 
 
 # ---------------------------------------------------------------------------
@@ -19,6 +21,7 @@ from engine.nlu import get_nlu_classifier, initialize_nlu_classifier, RetailInte
 from engine.flow_engine import process_turn
 from engine.escalation import check_escalation
 from engine.summary import generate_summary, initialize_summary_generator
+from engine.order_lookup import fetch_order_options
 from schemas.chat_request import ChatTurnRequest, SummaryRequest, ChatContext
 from schemas.chat_response import ChatTurnResponse, SummaryResponse, NLUOutput, OptionItem
 
@@ -141,13 +144,44 @@ async def chat_turn(request: ChatTurnRequest):
             nlu=nlu_out
         )
 
+    # Capture order_id if the selected option came from an order-select step
+    render = flow_result.render_instruction
+    if render.get("capture_as_order_id") and request.option_id:
+        ctx.order_id = request.option_id
+
     ctx.turn_count += 1
     ctx.current_flow = flow_result.next_flow
     ctx.flow_step = flow_result.next_step
 
-    render = flow_result.render_instruction
+    # If the next step needs orders from the API, fetch them now
     options = None
-    if "options" in render:
+    if render.get("fetch_orders"):
+        order_category = render.get("order_category", ctx.category or "")
+        fetched_options, api_order_id = await fetch_order_options(
+            customer_id=ctx.customer_id or "",
+            category=order_category,
+            base_url=ORDERS_API_BASE_URL,
+        )
+        if fetched_options:
+            options = [OptionItem(**o) for o in fetched_options]
+            if api_order_id and not ctx.order_id:
+                ctx.order_id = api_order_id
+        else:
+            # Category not supported by orders API (e.g. Grocery) or no past orders —
+            # auto-follow the wildcard transition to skip the order-select step.
+            skip_result = process_turn(
+                intent=None,
+                category=category,
+                option_selected="*",
+                current_flow=ctx.current_flow,
+                current_step=ctx.flow_step,
+            )
+            if not skip_result.escalate:
+                ctx.current_flow = skip_result.next_flow
+                ctx.flow_step = skip_result.next_step
+                render = skip_result.render_instruction
+                options = [OptionItem(**o) for o in render["options"]] if "options" in render else None
+    elif "options" in render:
         options = [OptionItem(**o) for o in render["options"]]
 
     nlu_out = NLUOutput(**nlu_result.to_dict()) if nlu_result else None

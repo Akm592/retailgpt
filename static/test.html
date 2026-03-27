@@ -46,6 +46,29 @@
   }
   .btn-new:hover { background: #c73652; }
 
+  .customer-id-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .customer-id-wrap label {
+    font-size: 11px;
+    color: #8888aa;
+    white-space: nowrap;
+  }
+  .customer-id-wrap input {
+    background: #2a2a4a;
+    border: 1px solid #444466;
+    color: #e0e0ff;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-family: monospace;
+    width: 90px;
+    outline: none;
+  }
+  .customer-id-wrap input:focus { border-color: #7b7bcc; }
+
   /* ── Layout ── */
   .layout {
     display: flex;
@@ -373,6 +396,10 @@
 
 <div class="header">
   <h1>RetailGPT — Chat Test UI</h1>
+  <div class="customer-id-wrap">
+    <label for="customer-id-input">Customer ID</label>
+    <input id="customer-id-input" type="text" placeholder="e.g. c1" value="">
+  </div>
   <button class="btn-new" onclick="newSession()">+ New Chat</button>
   <span class="session-id" id="session-label">no session</span>
 </div>
@@ -448,7 +475,8 @@ function genId() {
 
 function newSession() {
   sessionId  = genId();
-  context    = { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] };
+  const customerId = document.getElementById('customer-id-input').value.trim();
+  context    = { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[], customer_id: customerId || null };
   transcript = [];
   activeOptionGroup = null;
 
@@ -686,7 +714,7 @@ async function callTurn(message, messageType, optionId) {
     message:      message,
     message_type: messageType,
     option_id:    optionId || null,
-    context:      context || { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] },
+    context:      context || { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[], customer_id: null },
     transcript:   transcript,
   };
 
