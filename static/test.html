@@ -377,6 +377,19 @@
     line-height: 1.5;
   }
 
+  /* ── Info notice (no-options fallback) ── */
+  .info-notice {
+    align-self: center;
+    background: #f0f4ff;
+    border: 1px solid #c7d7f7;
+    color: #4b6cb7;
+    font-size: 12px;
+    border-radius: 8px;
+    padding: 7px 14px;
+    text-align: center;
+    max-width: 72%;
+  }
+
   /* ── Empty state ── */
   .empty-state {
     flex: 1;
@@ -532,6 +545,14 @@ function addTyping() {
 function removeTyping() {
   const t = document.getElementById('typing-row');
   if (t) t.remove();
+}
+
+function addInfoNotice(text) {
+  const el = document.createElement('div');
+  el.className = 'info-notice';
+  el.textContent = text;
+  document.getElementById('messages').appendChild(el);
+  scrollBottom();
 }
 
 function addBotBubble(text, extraClass) {
@@ -776,6 +797,13 @@ function renderBotTurn(data) {
   if (rt === 'options' && data.options?.length) {
     addOptions(data.options);
     setInput(false); // wait for option selection
+    return;
+  }
+
+  if (rt === 'options') {
+    // Options expected but none returned — show a notice and re-enable input
+    addInfoNotice('No options available. Please type your message or start a new chat.');
+    setInput(true);
     return;
   }
 

@@ -167,8 +167,9 @@ async def chat_turn(request: ChatTurnRequest):
             if api_order_id and not ctx.order_id:
                 ctx.order_id = api_order_id
         else:
-            # Category not supported by orders API (e.g. Grocery) or no past orders —
-            # auto-follow the wildcard transition to skip the order-select step.
+            # Category not supported by orders API (e.g. Grocery), no past orders,
+            # or API unavailable — auto-follow the wildcard transition to skip the
+            # order-select step and continue the flow.
             skip_result = process_turn(
                 intent=None,
                 category=category,
@@ -176,10 +177,28 @@ async def chat_turn(request: ChatTurnRequest):
                 current_flow=ctx.current_flow,
                 current_step=ctx.flow_step,
             )
-            if not skip_result.escalate:
+            if not skip_result.escalate and skip_result.next_step:
                 ctx.current_flow = skip_result.next_flow
                 ctx.flow_step = skip_result.next_step
-                render = skip_result.render_instruction
+                render = dict(skip_result.render_instruction)  # shallow copy — safe to mutate
+                # Prepend a brief notice so the user knows why no order picker appeared
+                if render.get("message"):
+                    render["message"] = (
+                        "We couldn't find any recent orders for your account. "
+                        + render["message"]
+                    )
+                options = [OptionItem(**o) for o in render["options"]] if "options" in render else None
+            else:
+                # Hard fallback: return to main menu
+                logger.warning("Order-select auto-skip failed; falling back to main menu")
+                fallback = process_turn(None, RetailCategory.UNKNOWN, None, None, None)
+                ctx.current_flow = fallback.next_flow
+                ctx.flow_step = fallback.next_step
+                render = dict(fallback.render_instruction)
+                render["message"] = (
+                    "We ran into an issue looking up your orders. "
+                    + render.get("message", "")
+                )
                 options = [OptionItem(**o) for o in render["options"]] if "options" in render else None
     elif "options" in render:
         options = [OptionItem(**o) for o in render["options"]]
