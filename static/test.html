@@ -466,7 +466,9 @@
     </div>
 
     <div class="dp-section">
-      <div class="dp-title">Raw Response</div>
+      <div class="dp-title">Request Payload</div>
+      <pre class="raw" id="v-raw-req">—</pre>
+      <div class="dp-title" style="margin-top:14px;">Response Payload</div>
       <pre class="raw" id="v-raw">—</pre>
     </div>
 
@@ -653,6 +655,7 @@ function clearDebug() {
   document.getElementById('v-escalate').className   = 'dp-val dim';
   document.getElementById('conf-bar').style.width   = '0%';
   document.getElementById('v-entities').innerHTML   = '';
+  document.getElementById('v-raw-req').textContent  = '—';
   document.getElementById('v-raw').textContent      = '—';
 }
 
@@ -739,6 +742,8 @@ async function callTurn(message, messageType, optionId) {
     context:      context || { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] },
     transcript:   transcript,
   };
+
+  document.getElementById('v-raw-req').textContent = JSON.stringify(body, null, 2);
 
   const typingRow = addTyping();
 
