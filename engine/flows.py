@@ -47,13 +47,15 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "options",
             "message": "Sure, let me check your order status. Which category is your order?",
             "options": [
-                {"id": "fb",      "label": "🍕 Food & Beverages (F&B)"},
-                {"id": "grocery", "label": "🛒 Grocery"},
+                {"id": "fb",          "label": "🍕 Food & Beverages (F&B)"},
+                {"id": "fashion",     "label": "👗 Fashion & Apparel"},
+                {"id": "electronics", "label": "💻 Electronics"},
             ],
         },
         "transitions": {
-            "fb":      "flow_order_select_status_fb",
-            "grocery": "flow_order_select_status_grocery",
+            "fb":          "flow_order_select_status_fb",
+            "fashion":     "flow_order_select_status_fashion",
+            "electronics": "flow_order_select_status_electronics",
         },
     },
 
@@ -72,34 +74,21 @@ FLOWS: Dict[str, Dict[str, Any]] = {
         },
     },
 
-    "flow_order_status_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Your order has been <Received/Packed/Shipped>. Expected to reach you by <today/tomorrow/date, time>.",
-            "options": [
-                {"id": "more", "label": "Yes, I have more questions"},
-                {"id": "done", "label": "No, I'm good 👍"},
-            ],
-        },
-        "transitions": {
-            "more": "main",
-            "done": "flow_end",
-        },
-    },
-
     # ── FLOW 2: Cancel Order ─────────────────────────────────────────────────
     "flow_cancel_detect": {
         "render": {
             "render_type": "options",
             "message": "I can help with your cancellation. What type of order is it?",
             "options": [
-                {"id": "fb",      "label": "🍕 Food & Beverages (F&B)"},
-                {"id": "grocery", "label": "🛒 Grocery"},
+                {"id": "fb",          "label": "🍕 Food & Beverages (F&B)"},
+                {"id": "fashion",     "label": "👗 Fashion & Apparel"},
+                {"id": "electronics", "label": "💻 Electronics"},
             ],
         },
         "transitions": {
-            "fb":      "flow_order_select_cancel_fb",
-            "grocery": "flow_order_select_cancel_grocery",
+            "fb":          "flow_order_select_cancel_fb",
+            "fashion":     "flow_order_select_cancel_fashion",
+            "electronics": "flow_order_select_cancel_electronics",
         },
     },
 
@@ -166,21 +155,6 @@ FLOWS: Dict[str, Dict[str, Any]] = {
         "transitions": {
             "more": "main",
             "done": "flow_end",
-        },
-    },
-
-    "flow_cancel_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Is the order still within the cancellation time frame?",
-            "options": [
-                {"id": "yes", "label": "Yes, within the window"},
-                {"id": "no",  "label": "No, time has elapsed"},
-            ],
-        },
-        "transitions": {
-            "yes": "flow_cancel_grocery_reason",
-            "no":  "flow_cancel_elapsed",
         },
     },
 
@@ -304,13 +278,15 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "render_type": "options",
             "message": "I'm sorry to hear that! What type of order was it?",
             "options": [
-                {"id": "fb",      "label": "🍕 Food & Beverages (F&B)"},
-                {"id": "grocery", "label": "🛒 Grocery"},
+                {"id": "fb",          "label": "🍕 Food & Beverages (F&B)"},
+                {"id": "fashion",     "label": "👗 Fashion & Apparel"},
+                {"id": "electronics", "label": "💻 Electronics"},
             ],
         },
         "transitions": {
-            "fb":      "flow_order_select_items_fb",
-            "grocery": "flow_order_select_items_grocery",
+            "fb":          "flow_order_select_items_fb",
+            "fashion":     "flow_order_select_items_fashion",
+            "electronics": "flow_order_select_items_electronics",
         },
     },
 
@@ -381,64 +357,6 @@ FLOWS: Dict[str, Dict[str, Any]] = {
         },
     },
 
-    "flow_items_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the issue:",
-            "options": [
-                {"id": "incorrect", "label": "❌ Incorrect items delivered"},
-                {"id": "missing",   "label": "📦 Items are missing"},
-            ],
-        },
-        "transitions": {
-            "incorrect": "flow_items_grocery_incorrect",
-            "missing":   "flow_items_grocery_missing",
-        },
-    },
-
-    "flow_items_grocery_incorrect": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the incorrectly delivered items from your order list. Would you prefer a Replacement or a Refund?",
-            "options": [
-                {"id": "replacement", "label": "🔄 I want a replacement"},
-                {"id": "refund",      "label": "💰 I want a refund"},
-            ],
-        },
-        "transitions": {
-            "replacement": "flow_items_grocery_ticket",
-            "refund":      "flow_items_grocery_ticket",
-        },
-    },
-
-    "flow_items_grocery_missing": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the missing items from your order list. Would you prefer a Replacement or a Refund?",
-            "options": [
-                {"id": "replacement", "label": "🔄 I want a replacement"},
-                {"id": "refund",      "label": "💰 I want a refund"},
-            ],
-        },
-        "transitions": {
-            "replacement": "flow_items_grocery_ticket",
-            "refund":      "flow_items_grocery_ticket",
-        },
-    },
-
-    "flow_items_grocery_ticket": {
-        "render": {
-            "render_type": "upload",
-            "message": "Please upload 3 photos 📷 of the items received. (Mandatory). Ticket #XXXX created — resolution within 48 hours. Retailer must respond within 24 hours. Replacement / Refund will be processed after confirmation. Auto-email will be sent.",
-            "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
-            "ticket_raised": True,
-            "issue_type": "incorrect_or_missing_item",
-        },
-        "transitions": {
-            "upload_complete": "flow_end",
-        },
-    },
-
     # ── FLOW 5: Quality Issue ────────────────────────────────────────────────
     "flow_quality_detect": {
         "render": {
@@ -446,14 +364,12 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "message": "I'm sorry to hear about the quality issue! Which category is your order?",
             "options": [
                 {"id": "fb",          "label": "🍕 Food & Beverages (F&B)"},
-                {"id": "grocery",     "label": "🛒 Grocery"},
                 {"id": "fashion",     "label": "👗 Fashion & Apparel"},
                 {"id": "electronics", "label": "💻 Electronics"},
             ],
         },
         "transitions": {
             "fb":          "flow_order_select_quality_fb",
-            "grocery":     "flow_order_select_quality_grocery",
             "fashion":     "flow_order_select_quality_fashion",
             "electronics": "flow_order_select_quality_electronics",
         },
@@ -502,82 +418,6 @@ FLOWS: Dict[str, Dict[str, Any]] = {
         },
         "transitions": {
             "ok": "ESCALATE",
-        },
-    },
-
-    # Grocery Quality
-    "flow_quality_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the specific quality issue:",
-            "options": [
-                {"id": "spoiled",   "label": "Item(s) are spoiled"},
-                {"id": "expired",   "label": "Expiry date has breached"},
-                {"id": "brand",     "label": "Ordered brand not received"},
-                {"id": "spillage",  "label": "Package / spillage issue"},
-                {"id": "open_seal", "label": "Product seal was open"},
-            ],
-        },
-        "transitions": {
-            "spoiled":   "flow_quality_grocery_threshold",
-            "expired":   "flow_quality_grocery_threshold",
-            "brand":     "flow_quality_grocery_threshold",
-            "spillage":  "flow_quality_grocery_threshold",
-            "open_seal": "flow_quality_grocery_threshold",
-        },
-    },
-
-    "flow_quality_grocery_threshold": {
-        "render": {
-            "render_type": "upload",
-            "message": "Please upload 3 pictures 📷 of the affected items. (Mandatory). What is the approximate value of the affected item(s)?",
-            "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
-            "ticket_raised": True,
-            "issue_type": "quality_issue_grocery",
-        },
-        "transitions": {
-            "upload_complete": "flow_quality_grocery_threshold_choice",
-        },
-    },
-
-    "flow_quality_grocery_threshold_choice": {
-        "render": {
-            "render_type": "options",
-            "message": "What is the approximate value of the affected item(s)?",
-            "options": [
-                {"id": "low",  "label": "₹150 or below"},
-                {"id": "high", "label": "Above ₹150"},
-            ],
-        },
-        "transitions": {
-            "low":  "flow_quality_grocery_low",
-            "high": "flow_quality_grocery_high",
-        },
-    },
-
-    "flow_quality_grocery_low": {
-        "render": {
-            "render_type": "options",
-            "message": "Since item value is ≤ ₹150, agent will directly process your refund after verification. <Refund value> will be refunded in <N> days. Ticket sent to retailer — must close within 24 hours.",
-            "options": [
-                {"id": "ok", "label": "Okay, thank you"},
-            ],
-        },
-        "transitions": {
-            "ok": "flow_end",
-        },
-    },
-
-    "flow_quality_grocery_high": {
-        "render": {
-            "render_type": "options",
-            "message": "Since item value is > ₹150, agent will create a ticket assigned to the Retailer (24hr SLA). After retailer confirmation, your Refund or Replacement will be processed.",
-            "options": [
-                {"id": "ok", "label": "Okay, I'll wait for resolution"},
-            ],
-        },
-        "transitions": {
-            "ok": "flow_end",
         },
     },
 
@@ -1074,17 +914,6 @@ FLOWS: Dict[str, Dict[str, Any]] = {
         "transitions": {"*": "flow_order_status_fb"},
     },
 
-    "flow_order_select_status_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the order you'd like to check:",
-            "options": [],
-            "fetch_orders": True,
-            "order_category": "grocery",
-            "capture_as_order_id": True,
-        },
-        "transitions": {"*": "flow_order_status_grocery"},
-    },
 
     "flow_order_select_cancel_fb": {
         "render": {
@@ -1096,18 +925,6 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "capture_as_order_id": True,
         },
         "transitions": {"*": "flow_cancel_fb"},
-    },
-
-    "flow_order_select_cancel_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the order you'd like to cancel:",
-            "options": [],
-            "fetch_orders": True,
-            "order_category": "grocery",
-            "capture_as_order_id": True,
-        },
-        "transitions": {"*": "flow_cancel_grocery"},
     },
 
     "flow_order_select_items_fb": {
@@ -1122,18 +939,6 @@ FLOWS: Dict[str, Dict[str, Any]] = {
         "transitions": {"*": "flow_items_fb"},
     },
 
-    "flow_order_select_items_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the order with the item issue:",
-            "options": [],
-            "fetch_orders": True,
-            "order_category": "grocery",
-            "capture_as_order_id": True,
-        },
-        "transitions": {"*": "flow_items_grocery"},
-    },
-
     "flow_order_select_quality_fb": {
         "render": {
             "render_type": "options",
@@ -1144,18 +949,6 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "capture_as_order_id": True,
         },
         "transitions": {"*": "flow_quality_fb"},
-    },
-
-    "flow_order_select_quality_grocery": {
-        "render": {
-            "render_type": "options",
-            "message": "Please select the order with the quality issue:",
-            "options": [],
-            "fetch_orders": True,
-            "order_category": "grocery",
-            "capture_as_order_id": True,
-        },
-        "transitions": {"*": "flow_quality_grocery"},
     },
 
     "flow_order_select_quality_fashion": {
@@ -1180,6 +973,202 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "capture_as_order_id": True,
         },
         "transitions": {"*": "flow_quality_electronics"},
+    },
+
+    # ── Order Select: Fashion & Electronics (status, cancel, items) ──────────
+
+    "flow_order_select_status_fashion": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to check:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fashion",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_order_status_fashion"},
+    },
+
+    "flow_order_select_status_electronics": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to check:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "electronics",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_order_status_electronics"},
+    },
+
+    "flow_order_select_cancel_fashion": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to cancel:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fashion",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_cancel_fashion"},
+    },
+
+    "flow_order_select_cancel_electronics": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order you'd like to cancel:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "electronics",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_cancel_electronics"},
+    },
+
+    "flow_order_select_items_fashion": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the item issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "fashion",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_items_fashion"},
+    },
+
+    "flow_order_select_items_electronics": {
+        "render": {
+            "render_type": "options",
+            "message": "Please select the order with the item issue:",
+            "options": [],
+            "fetch_orders": True,
+            "order_category": "electronics",
+            "capture_as_order_id": True,
+        },
+        "transitions": {"*": "flow_items_electronics"},
+    },
+
+    # ── Order Status: Fashion & Electronics ───────────────────────────────────
+
+    "flow_order_status_fashion": {
+        "render": {
+            "render_type": "options",
+            "message": "Your order has been <Received/Packed/Shipped>. Expected delivery by <today/tomorrow/date, time>.",
+            "options": [
+                {"id": "more", "label": "Yes, I have more questions"},
+                {"id": "done", "label": "No, I'm good 👍"},
+            ],
+        },
+        "transitions": {
+            "more": "main",
+            "done": "flow_end",
+        },
+    },
+
+    "flow_order_status_electronics": {
+        "render": {
+            "render_type": "options",
+            "message": "Your order has been <Received/Packed/Shipped>. Expected delivery by <today/tomorrow/date, time>.",
+            "options": [
+                {"id": "more", "label": "Yes, I have more questions"},
+                {"id": "done", "label": "No, I'm good 👍"},
+            ],
+        },
+        "transitions": {
+            "more": "main",
+            "done": "flow_end",
+        },
+    },
+
+    # ── Cancel: Fashion & Electronics ─────────────────────────────────────────
+
+    "flow_cancel_fashion": {
+        "render": {
+            "render_type": "options",
+            "message": "Is the order still within the cancellation time frame?",
+            "options": [
+                {"id": "yes", "label": "Yes, within the window"},
+                {"id": "no",  "label": "No, time has elapsed"},
+            ],
+        },
+        "transitions": {
+            "yes": "flow_cancel_grocery_reason",
+            "no":  "flow_cancel_elapsed",
+        },
+    },
+
+    "flow_cancel_electronics": {
+        "render": {
+            "render_type": "options",
+            "message": "Is the order still within the cancellation time frame?",
+            "options": [
+                {"id": "yes", "label": "Yes, within the window"},
+                {"id": "no",  "label": "No, time has elapsed"},
+            ],
+        },
+        "transitions": {
+            "yes": "flow_cancel_grocery_reason",
+            "no":  "flow_cancel_elapsed",
+        },
+    },
+
+    # ── Items Issue: Fashion & Electronics ────────────────────────────────────
+
+    "flow_items_fashion": {
+        "render": {
+            "render_type": "options",
+            "message": "What is the issue with the items delivered?",
+            "options": [
+                {"id": "incorrect", "label": "❌ Incorrect items delivered"},
+                {"id": "missing",   "label": "📦 Items are missing"},
+            ],
+        },
+        "transitions": {
+            "incorrect": "flow_items_fashion_ticket",
+            "missing":   "flow_items_fashion_ticket",
+        },
+    },
+
+    "flow_items_fashion_ticket": {
+        "render": {
+            "render_type": "upload",
+            "message": "Please upload 3 photos 📷 of the items received. (Mandatory). Ticket #XXXX created — resolution within 48 hours. Retailer must respond within 24 hours. Replacement / Refund will be processed after confirmation. Auto-email will be sent.",
+            "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "incorrect_or_missing_item_fashion",
+        },
+        "transitions": {
+            "upload_complete": "flow_end",
+        },
+    },
+
+    "flow_items_electronics": {
+        "render": {
+            "render_type": "options",
+            "message": "What is the issue with the items delivered?",
+            "options": [
+                {"id": "incorrect", "label": "❌ Incorrect items delivered"},
+                {"id": "missing",   "label": "📦 Items are missing"},
+            ],
+        },
+        "transitions": {
+            "incorrect": "flow_items_electronics_ticket",
+            "missing":   "flow_items_electronics_ticket",
+        },
+    },
+
+    "flow_items_electronics_ticket": {
+        "render": {
+            "render_type": "upload",
+            "message": "Please upload 3 photos 📷 of the items received. (Mandatory). Ticket #XXXX created — resolution within 48 hours. Retailer must respond within 24 hours. Replacement / Refund will be processed after confirmation. Auto-email will be sent.",
+            "upload_config": {"required": True, "min_photos": 3, "video": False, "max_size_mb": 20},
+            "ticket_raised": True,
+            "issue_type": "incorrect_or_missing_item_electronics",
+        },
+        "transitions": {
+            "upload_complete": "flow_end",
+        },
     },
 
     # ── End: Survey ───────────────────────────────────────────────────────────
@@ -1228,13 +1217,15 @@ from engine.nlu import RetailIntent, RetailCategory
 INTENT_TO_STEP = {
     RetailIntent.TRACK_ORDER: {
         RetailCategory.FB:          "flow_order_status_fb",
-        RetailCategory.GROCERY:     "flow_order_status_grocery",
+        RetailCategory.FASHION:     "flow_order_status_fashion",
+        RetailCategory.ELECTRONICS: "flow_order_status_electronics",
         RetailCategory.UNKNOWN:     "flow_order_status",
         "*":                        "flow_order_status",
     },
     RetailIntent.CANCEL_ORDER: {
         RetailCategory.FB:          "flow_cancel_fb",
-        RetailCategory.GROCERY:     "flow_cancel_grocery",
+        RetailCategory.FASHION:     "flow_cancel_fashion",
+        RetailCategory.ELECTRONICS: "flow_cancel_electronics",
         RetailCategory.UNKNOWN:     "flow_cancel_detect",
         "*":                        "flow_cancel_detect",
     },
@@ -1243,7 +1234,6 @@ INTENT_TO_STEP = {
     RetailIntent.WRONG_ITEM:     {"*": "flow_items_detect"},
     RetailIntent.QUALITY_ISSUE: {
         RetailCategory.FB:          "flow_quality_fb",
-        RetailCategory.GROCERY:     "flow_quality_grocery",
         RetailCategory.FASHION:     "flow_quality_fashion",
         RetailCategory.ELECTRONICS: "flow_quality_electronics",
         RetailCategory.UNKNOWN:     "flow_quality_detect",

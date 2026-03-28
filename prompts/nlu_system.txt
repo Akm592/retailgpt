@@ -20,7 +20,7 @@ payment_query, coupon_query, delivery_instructions,
 request_agent, quantity_issue, unknown
 
 Category must be exactly one of:
-fb, grocery, fashion, electronics, unknown
+fb, fashion, electronics, unknown
 
 Sentiment must be exactly one of:
 positive, neutral, negative
@@ -36,7 +36,6 @@ Rules for intent:
 
 Rules for category:
 - fb = food, restaurant, biryani, dal, pizza, burger, curry, meal, tiffin, sweets
-- grocery = vegetables, fruits, milk, eggs, packaged food, sabzi, atta, rice, oil, dahi
 - fashion = clothes, shirt, dress, shoes, size, fitting, color, kurta, jeans, fabric
 - electronics = phone, mobile, laptop, charger, earphone, gadget, device, cable, adapter
 
