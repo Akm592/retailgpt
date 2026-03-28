@@ -9,7 +9,8 @@
       "Bash(python3.12 -m pip install httpx -q)",
       "Bash(python3.12 -c \":*)",
       "Bash(python3.12 -c \"import app; print\\(''''app.py OK''''\\)\")",
-      "Bash(find /home/ashish/Documents/GitHub/Reatailgpt-mvp -type f -name *.py -o -name *.txt -o -name *.md -o -name Procfile -o -name .env*)"
+      "Bash(find /home/ashish/Documents/GitHub/Reatailgpt-mvp -type f -name *.py -o -name *.txt -o -name *.md -o -name Procfile -o -name .env*)",
+      "Bash(python3:*)"
     ]
   }
 }

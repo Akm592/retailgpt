@@ -314,20 +314,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "incorrect_item",
         },
         "transitions": {
-            "upload_complete": "flow_items_fb_incorrect_done",
-        },
-    },
-
-    "flow_items_fb_incorrect_done": {
-        "render": {
-            "render_type": "options",
-            "message": "Chat connected to live agent for verification. Once verified: Rs.<refund value> will be refunded to your source account in <N> days. An auto-email confirmation will be sent.",
-            "options": [
-                {"id": "ok", "label": "Okay, thank you"},
-            ],
-        },
-        "transitions": {
-            "ok": "ESCALATE",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -340,20 +327,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "missing_item",
         },
         "transitions": {
-            "upload_complete": "flow_items_fb_missing_done",
-        },
-    },
-
-    "flow_items_fb_missing_done": {
-        "render": {
-            "render_type": "options",
-            "message": "Live agent is verifying your claim. Once confirmed: Rs.<refund value> will be refunded to your source account in <N> days. An auto-email confirmation will be sent.",
-            "options": [
-                {"id": "ok", "label": "Okay, thank you"},
-            ],
-        },
-        "transitions": {
-            "ok": "ESCALATE",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -404,20 +378,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "quality_issue_fb",
         },
         "transitions": {
-            "upload_complete": "flow_quality_fb_done",
-        },
-    },
-
-    "flow_quality_fb_done": {
-        "render": {
-            "render_type": "options",
-            "message": "Connecting to live agent for verification. Once verified: <refund value> will be refunded to your source account in <N> days. A ticket has been sent to the retailer for acknowledgement.",
-            "options": [
-                {"id": "ok", "label": "Okay, thank you"},
-            ],
-        },
-        "transitions": {
-            "ok": "ESCALATE",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -460,7 +421,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "quality_issue_fashion",
         },
         "transitions": {
-            "upload_complete": "flow_end",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -473,7 +434,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "quality_issue_fashion",
         },
         "transitions": {
-            "upload_complete": "flow_end",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -486,7 +447,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "quality_issue_fashion_packing",
         },
         "transitions": {
-            "upload_complete": "flow_end",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -525,7 +486,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "quality_issue_electronics",
         },
         "transitions": {
-            "upload_complete": "flow_end",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -538,7 +499,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "quality_issue_electronics_packing",
         },
         "transitions": {
-            "upload_complete": "flow_end",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -1139,7 +1100,7 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "incorrect_or_missing_item_fashion",
         },
         "transitions": {
-            "upload_complete": "flow_end",
+            "upload_complete": "flow_ticket_confirmed",
         },
     },
 
@@ -1167,7 +1128,23 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "issue_type": "incorrect_or_missing_item_electronics",
         },
         "transitions": {
-            "upload_complete": "flow_end",
+            "upload_complete": "flow_ticket_confirmed",
+        },
+    },
+
+    # ── Shared post-upload confirmation ──────────────────────────────────────
+    "flow_ticket_confirmed": {
+        "render": {
+            "render_type": "options",
+            "message": "Your ticket has been raised successfully. ✅ An auto-email confirmation will be sent to you shortly. Would you like to be connected to a live agent for immediate assistance?",
+            "options": [
+                {"id": "agent", "label": "Yes, connect me to a live agent"},
+                {"id": "done",  "label": "No, I'm good 👍"},
+            ],
+        },
+        "transitions": {
+            "agent": "ESCALATE",
+            "done":  "flow_end",
         },
     },
 
