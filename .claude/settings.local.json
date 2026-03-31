@@ -10,7 +10,10 @@
       "Bash(python3.12 -c \":*)",
       "Bash(python3.12 -c \"import app; print\\(''''app.py OK''''\\)\")",
       "Bash(find /home/ashish/Documents/GitHub/Reatailgpt-mvp -type f -name *.py -o -name *.txt -o -name *.md -o -name Procfile -o -name .env*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(find /home/ashish/Documents/GitHub/Reatailgpt-mvp -type f -name \"*.py\" -exec wc -l {} +)",
+      "Bash(grep -r \"sqlalchemy\\\\|psycopg\\\\|database\\\\|sql\" /home/ashish/Documents/GitHub/Reatailgpt-mvp --include=*.py --include=*.txt)",
+      "Bash(grep:*)"
     ]
   }
 }

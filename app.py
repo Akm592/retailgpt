@@ -22,8 +22,14 @@ from engine.flow_engine import process_turn
 from engine.escalation import check_escalation
 from engine.summary import generate_summary, initialize_summary_generator
 from engine.order_lookup import fetch_order_options
+from engine.agent_scorer import score_agent, agent_performance, initialize_agent_scorer
 from schemas.chat_request import ChatTurnRequest, SummaryRequest, ChatContext
 from schemas.chat_response import ChatTurnResponse, SummaryResponse, NLUOutput, OptionItem
+from schemas.agent_score import (
+    AgentScoreRequest, AgentScoreResponse,
+    AgentPerformanceRequest, AgentPerformanceResponse,
+)
+from fastapi import HTTPException
 
 
 # ---------------------------------------------------------------------------
@@ -33,6 +39,7 @@ from schemas.chat_response import ChatTurnResponse, SummaryResponse, NLUOutput, 
 async def lifespan(app: FastAPI):
     await initialize_nlu_classifier()
     await initialize_summary_generator()
+    await initialize_agent_scorer()
     logger.info("CRM engine modules ready")
     logger.info("API ready to accept requests")
     yield
@@ -230,3 +237,44 @@ async def chat_summary_endpoint(request: SummaryRequest):
         order_id=request.order_id,
     )
     return SummaryResponse(summary=summary)
+
+
+# ---------------------------------------------------------------------------
+# Analytics routes
+# ---------------------------------------------------------------------------
+
+@app.post("/analytics/agent-score", response_model=AgentScoreResponse, tags=["Analytics"])
+async def agent_score_endpoint(request: AgentScoreRequest):
+    """Score a single handover interaction on 7 rubrics using AI."""
+    try:
+        result = await score_agent(request.customer_id, request.handover_id)
+        return AgentScoreResponse(**result)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Handover not found")
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="customer_id does not match this handover")
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Agent scoring error: {e}")
+        raise HTTPException(status_code=500, detail="Scoring failed")
+
+
+@app.post("/analytics/agent-performance", response_model=AgentPerformanceResponse, tags=["Analytics"])
+async def agent_performance_endpoint(request: AgentPerformanceRequest):
+    """Evaluate an agent's overall performance across all handovers with AI narrative and rubric scores."""
+    try:
+        result = await agent_performance(
+            request.agent_id,
+            request.start_date,
+            request.end_date,
+            request.sample_limit,
+        )
+        return AgentPerformanceResponse(**result)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Agent performance error: {e}")
+        raise HTTPException(status_code=500, detail="Performance analysis failed")
