@@ -1189,16 +1189,16 @@ FLOWS: Dict[str, Dict[str, Any]] = {
 # Group labels for main-menu option IDs.
 # ---------------------------------------------------------------------------
 MAIN_MENU_OPTION_GROUPS: dict[str, str] = {
-    "order_status":          "General",
-    "cancel":                "Operations",
-    "delayed":               "Operations",
-    "items_issue":           "Operations",
-    "quality_issue":         "Operations",
-    "quantity_issue":        "Operations",
-    "delivery_instructions": "Operations",
-    "modify":                "Operations",
-    "coupon":                "Billing",
-    "payment":               "Billing",
+    "order_status":          "general",
+    "cancel":                "operations",
+    "delayed":               "operations",
+    "items_issue":           "operations",
+    "quality_issue":         "operations",
+    "quantity_issue":        "operations",
+    "delivery_instructions": "operations",
+    "modify":                "operations",
+    "coupon":                "billing",
+    "payment":               "billing",
 }
 
 
