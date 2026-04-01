@@ -19,6 +19,7 @@ ORDERS_API_BASE_URL: str = os.getenv("ORDERS_API_BASE_URL", "")
 # ---------------------------------------------------------------------------
 from engine.nlu import get_nlu_classifier, initialize_nlu_classifier, RetailIntent, RetailCategory
 from engine.flow_engine import process_turn
+from engine.flows import MAIN_MENU_OPTION_GROUPS
 from engine.escalation import check_escalation
 from engine.summary import generate_summary, initialize_summary_generator
 from engine.order_lookup import fetch_order_options
@@ -26,8 +27,8 @@ from engine.agent_scorer import score_agent, agent_performance, initialize_agent
 from schemas.chat_request import ChatTurnRequest, SummaryRequest, ChatContext
 from schemas.chat_response import ChatTurnResponse, SummaryResponse, NLUOutput, OptionItem
 from schemas.agent_score import (
-    AgentScoreRequest, AgentScoreResponse,
-    AgentPerformanceRequest, AgentPerformanceResponse,
+    EvaluateHumanHandoverRequest, EvaluateHumanHandoverResponse,
+    EvaluateHumanAgentRequest, EvaluateHumanAgentResponse,
 )
 from fastapi import HTTPException
 
@@ -156,6 +157,10 @@ async def chat_turn(request: ChatTurnRequest):
     if render.get("capture_as_order_id") and request.option_id:
         ctx.order_id = request.option_id
 
+    # Capture group when the user selects from the main menu
+    if request.option_id and request.context.flow_step == "main" and request.option_id in MAIN_MENU_OPTION_GROUPS:
+        ctx.group = MAIN_MENU_OPTION_GROUPS[request.option_id]
+
     ctx.turn_count += 1
     ctx.current_flow = flow_result.next_flow
     ctx.flow_step = flow_result.next_step
@@ -220,6 +225,7 @@ async def chat_turn(request: ChatTurnRequest):
         terminal=render.get("terminal", False),
         ticket_raised=render.get("ticket_raised", False),
         issue_type=render.get("issue_type"),
+        group=ctx.group,
         escalate=False,
         escalate_reason=None,
         ai_summary=None,
@@ -243,16 +249,14 @@ async def chat_summary_endpoint(request: SummaryRequest):
 # Analytics routes
 # ---------------------------------------------------------------------------
 
-@app.post("/analytics/agent-score", response_model=AgentScoreResponse, tags=["Analytics"])
-async def agent_score_endpoint(request: AgentScoreRequest):
-    """Score a single handover interaction on 7 rubrics using AI."""
+@app.post("/analytics/evaluate-human-handover", response_model=EvaluateHumanHandoverResponse, tags=["Analytics"])
+async def evaluate_human_handover_endpoint(request: EvaluateHumanHandoverRequest):
+    """Score a single human agent's handover interaction on 7 rubrics using AI."""
     try:
-        result = await score_agent(request.customer_id, request.handover_id)
-        return AgentScoreResponse(**result)
+        result = await score_agent(request.handover_id)
+        return EvaluateHumanHandoverResponse(**result)
     except LookupError:
         raise HTTPException(status_code=404, detail="Handover not found")
-    except PermissionError:
-        raise HTTPException(status_code=403, detail="customer_id does not match this handover")
     except ValueError as e:
         raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
     except Exception as e:
@@ -260,9 +264,9 @@ async def agent_score_endpoint(request: AgentScoreRequest):
         raise HTTPException(status_code=500, detail="Scoring failed")
 
 
-@app.post("/analytics/agent-performance", response_model=AgentPerformanceResponse, tags=["Analytics"])
-async def agent_performance_endpoint(request: AgentPerformanceRequest):
-    """Evaluate an agent's overall performance across all handovers with AI narrative and rubric scores."""
+@app.post("/analytics/evaluate-human-agent", response_model=EvaluateHumanAgentResponse, tags=["Analytics"])
+async def evaluate_human_agent_endpoint(request: EvaluateHumanAgentRequest):
+    """Evaluate a human agent's overall performance across all handovers with AI narrative and rubric scores."""
     try:
         result = await agent_performance(
             request.agent_id,
@@ -270,7 +274,7 @@ async def agent_performance_endpoint(request: AgentPerformanceRequest):
             request.end_date,
             request.sample_limit,
         )
-        return AgentPerformanceResponse(**result)
+        return EvaluateHumanAgentResponse(**result)
     except LookupError:
         raise HTTPException(status_code=404, detail="Agent not found")
     except ValueError as e:

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from supabase import AsyncClient, acreate_client
 
 load_dotenv()
-logger = logging.getLogger("agent_scorer")
+logger = logging.getLogger("human_agent_scorer")
 
 RUBRIC_WEIGHTS = {
     "resolution_quality":              0.20,
@@ -113,7 +113,7 @@ class AgentScorer:
         )
 
         self._db: Optional[AsyncClient] = None
-        logger.info("AgentScorer initialised")
+        logger.info("Human AgentScorer initialised")
 
     async def _get_db(self) -> AsyncClient:
         if self._db is None:
@@ -128,7 +128,7 @@ class AgentScorer:
     # Per-handover scoring
     # ------------------------------------------------------------------
 
-    async def score(self, customer_id: str, handover_id: str) -> dict:
+    async def score(self, handover_id: str) -> dict:
         db = await self._get_db()
 
         # Q1: fetch handover
@@ -136,8 +136,6 @@ class AgentScorer:
         if not q1.data:
             raise LookupError(f"handover_not_found:{handover_id}")
         handover = q1.data[0]
-        if handover.get("customer_id") != customer_id:
-            raise PermissionError("customer_id_mismatch")
 
         session_id = handover.get("session_id")
         agent_id = handover.get("agent_id")
@@ -507,8 +505,8 @@ async def initialize_agent_scorer() -> None:
     _scorer_instance = AgentScorer()
 
 
-async def score_agent(customer_id: str, handover_id: str) -> dict:
-    return await get_agent_scorer().score(customer_id, handover_id)
+async def score_agent(handover_id: str) -> dict:
+    return await get_agent_scorer().score(handover_id)
 
 
 async def agent_performance(

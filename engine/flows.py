@@ -1186,6 +1186,23 @@ FLOWS: Dict[str, Dict[str, Any]] = {
 
 
 # ---------------------------------------------------------------------------
+# Group labels for main-menu option IDs.
+# ---------------------------------------------------------------------------
+MAIN_MENU_OPTION_GROUPS: dict[str, str] = {
+    "order_status":          "General",
+    "cancel":                "Operations",
+    "delayed":               "Operations",
+    "items_issue":           "Operations",
+    "quality_issue":         "Operations",
+    "quantity_issue":        "Operations",
+    "delivery_instructions": "Operations",
+    "modify":                "Operations",
+    "coupon":                "Billing",
+    "payment":               "Billing",
+}
+
+
+# ---------------------------------------------------------------------------
 # Intent → initial step ID mapping (replaces INTENT_TO_FLOW)
 # When category is known, route directly to the category-specific step.
 # ---------------------------------------------------------------------------

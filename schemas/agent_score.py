@@ -16,23 +16,21 @@ class RubricScore(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# POST /analytics/agent-score  (per-handover)
+# POST /analytics/evaluate-human-handover
 # ---------------------------------------------------------------------------
 
-class AgentScoreRequest(BaseModel):
-    customer_id: str = Field(..., description="Customer ID — must match the handover record")
+class EvaluateHumanHandoverRequest(BaseModel):
     handover_id: str = Field(..., description="Handover ID to score")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "customer_id": "cust_abc123",
                 "handover_id": "hov_xyz789",
             }
         }
 
 
-class AgentScoreResponse(BaseModel):
+class EvaluateHumanHandoverResponse(BaseModel):
     handover_id: str
     agent_id: Optional[str] = None
     agent_name: Optional[str] = None
@@ -46,10 +44,10 @@ class AgentScoreResponse(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# POST /analytics/agent-performance  (overall / aggregate)
+# POST /analytics/evaluate-human-agent  (overall / aggregate)
 # ---------------------------------------------------------------------------
 
-class AgentPerformanceRequest(BaseModel):
+class EvaluateHumanAgentRequest(BaseModel):
     agent_id: str = Field(..., description="Agent user ID to evaluate")
     start_date: Optional[str] = Field(None, description="Filter handovers from this date inclusive (YYYY-MM-DD)")
     end_date: Optional[str] = Field(None, description="Filter handovers until this date inclusive (YYYY-MM-DD)")
@@ -89,7 +87,7 @@ class TimingStats(BaseModel):
     max_resolution_hours: Optional[float] = None
 
 
-class AgentPerformanceResponse(BaseModel):
+class EvaluateHumanAgentResponse(BaseModel):
     agent_id: str
     agent_name: Optional[str] = None
     period: dict = Field(..., description='{"start": "...", "end": "...", "handovers_analyzed": N}')
