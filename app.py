@@ -50,6 +50,20 @@ app = FastAPI(title="RetailGPT Customer Support API", lifespan=lifespan)
 
 
 # ---------------------------------------------------------------------------
+# Health check
+# ---------------------------------------------------------------------------
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the RetailGPT Customer Support API"}
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok",
+        "nlu_ready": get_nlu_classifier() is not None,
+    }
+
+# ---------------------------------------------------------------------------
 # Test UI
 # ---------------------------------------------------------------------------
 @app.get("/test", include_in_schema=False)
