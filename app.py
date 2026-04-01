@@ -136,6 +136,7 @@ async def chat_turn(request: ChatTurnRequest):
             escalate=True,
             escalate_reason=esc.reason,
             ai_summary=summary,
+            group=ctx.group,
             next_context=None,
             nlu=nlu_out
         )
@@ -162,6 +163,7 @@ async def chat_turn(request: ChatTurnRequest):
             escalate=True,
             escalate_reason=flow_result.escalate_reason,
             ai_summary=summary,
+            group=ctx.group,
             next_context=None,
             nlu=nlu_out
         )
