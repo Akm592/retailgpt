@@ -1,0 +1,424 @@
+# Button routing single-turn tests
+# These test option_select transitions — NLU does NOT run for these.
+# We supply a starting flow_step in context and verify the landing step.
+
+# ── MAIN MENU → first step ────────────────────────────────────────────────────
+- id: btn_main_001
+  description: "Main menu: order_status → flow_order_status"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "order_status"
+    message_type: option_select
+    option_id: order_status
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_order_status
+    render_type: options
+    options_include_id: [fb, fashion, electronics]
+  tags: [button, main_menu]
+
+- id: btn_main_002
+  description: "Main menu: cancel → flow_cancel_detect"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "cancel"
+    message_type: option_select
+    option_id: cancel
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_cancel_detect
+    render_type: options
+  tags: [button, main_menu]
+
+- id: btn_main_003
+  description: "Main menu: delayed → flow_delayed"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "delayed"
+    message_type: option_select
+    option_id: delayed
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_delayed
+    render_type: options
+    options_include_id: [ontime, late]
+  tags: [button, main_menu]
+
+- id: btn_main_004
+  description: "Main menu: items_issue → flow_items_detect"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "items_issue"
+    message_type: option_select
+    option_id: items_issue
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_items_detect
+    render_type: options
+  tags: [button, main_menu]
+
+- id: btn_main_005
+  description: "Main menu: quality_issue → flow_quality_detect"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "quality_issue"
+    message_type: option_select
+    option_id: quality_issue
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_quality_detect
+    render_type: options
+  tags: [button, main_menu]
+
+- id: btn_main_006
+  description: "Main menu: quantity_issue → flow_quantity"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "quantity_issue"
+    message_type: option_select
+    option_id: quantity_issue
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_quantity
+    render_type: options
+    options_include_id: [less_vs_others, expected_more, more_received]
+  tags: [button, main_menu]
+
+- id: btn_main_007
+  description: "Main menu: delivery_instructions → flow_delivery_instructions"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "delivery_instructions"
+    message_type: option_select
+    option_id: delivery_instructions
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_delivery_instructions
+    render_type: options
+    options_include_id: [no_bell, door, no_call, directions, neighbour]
+  tags: [button, main_menu]
+
+- id: btn_main_008
+  description: "Main menu: modify → flow_modify"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "modify"
+    message_type: option_select
+    option_id: modify
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_modify
+    render_type: options
+  tags: [button, main_menu]
+
+- id: btn_main_009
+  description: "Main menu: coupon → flow_coupon"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "coupon"
+    message_type: option_select
+    option_id: coupon
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_coupon
+    render_type: options
+    options_include_id: [find, apply, forgot]
+  tags: [button, main_menu]
+
+- id: btn_main_010
+  description: "Main menu: payment — triggers mandatory escalation immediately"
+  category: button_routing
+  subcategory: main_menu
+  input:
+    message: "payment"
+    message_type: option_select
+    option_id: payment
+    context:
+      flow_step: main
+      turn_count: 1
+  expect:
+    next_context.flow_step: flow_payment
+    render_type: options
+  tags: [button, main_menu, payment]
+
+# ── CANCEL FLOW ───────────────────────────────────────────────────────────────
+- id: btn_cancel_001
+  description: "flow_cancel_detect: fb → order select or flow_cancel_fb"
+  category: button_routing
+  subcategory: cancel
+  input:
+    message: "fb"
+    message_type: option_select
+    option_id: fb
+    context:
+      flow_step: flow_cancel_detect
+      turn_count: 2
+  expect:
+    next_context.flow_step_oneof: [flow_order_select_cancel_fb, flow_cancel_fb]
+  tags: [button, cancel, fb]
+
+- id: btn_cancel_002
+  description: "flow_cancel_fb: yes (within 30s) → flow_cancel_fb_reason"
+  category: button_routing
+  subcategory: cancel
+  input:
+    message: "yes"
+    message_type: option_select
+    option_id: "yes"
+    context:
+      flow_step: flow_cancel_fb
+      turn_count: 3
+  expect:
+    next_context.flow_step: flow_cancel_fb_reason
+    render_type: options
+    options_include_id: [duplicate, add_items, price, wrong, not_avail]
+  tags: [button, cancel, fb]
+
+- id: btn_cancel_003
+  description: "flow_cancel_fb: no (elapsed) → flow_cancel_elapsed"
+  category: button_routing
+  subcategory: cancel
+  input:
+    message: "no"
+    message_type: option_select
+    option_id: "no"
+    context:
+      flow_step: flow_cancel_fb
+      turn_count: 3
+  expect:
+    next_context.flow_step: flow_cancel_elapsed
+    render_type: options
+    message_contains: cancellation time
+  tags: [button, cancel, fb]
+
+- id: btn_cancel_004
+  description: "flow_cancel_fb_reason: duplicate → flow_cancel_done"
+  category: button_routing
+  subcategory: cancel
+  input:
+    message: "duplicate"
+    message_type: option_select
+    option_id: duplicate
+    context:
+      flow_step: flow_cancel_fb_reason
+      turn_count: 4
+  expect:
+    next_context.flow_step: flow_cancel_done
+    message_contains: successfully cancelled
+  tags: [button, cancel, fb]
+
+- id: btn_cancel_005
+  description: "flow_cancel_grocery_reason: not_home → flow_cancel_reschedule"
+  category: button_routing
+  subcategory: cancel
+  input:
+    message: "not_home"
+    message_type: option_select
+    option_id: not_home
+    context:
+      flow_step: flow_cancel_grocery_reason
+      turn_count: 4
+  expect:
+    next_context.flow_step: flow_cancel_reschedule
+    options_include_id: [reschedule, cancel]
+  tags: [button, cancel, grocery]
+
+# ── QUALITY FLOW ──────────────────────────────────────────────────────────────
+- id: btn_quality_001
+  description: "flow_quality_fb: stale → flow_quality_fb_upload"
+  category: button_routing
+  subcategory: quality
+  input:
+    message: "stale"
+    message_type: option_select
+    option_id: stale
+    context:
+      flow_step: flow_quality_fb
+      turn_count: 3
+  expect:
+    next_context.flow_step: flow_quality_fb_upload
+    render_type: upload
+    ticket_raised: true
+    issue_type: quality_issue_fb
+    upload_config.min_photos: 3
+    upload_config.video: true
+  tags: [button, quality, fb]
+
+- id: btn_quality_002
+  description: "flow_quality_fashion: packing_damaged → flow_quality_fashion_packing"
+  category: button_routing
+  subcategory: quality
+  input:
+    message: "packing_damaged"
+    message_type: option_select
+    option_id: packing_damaged
+    context:
+      flow_step: flow_quality_fashion
+      turn_count: 3
+  expect:
+    next_context.flow_step: flow_quality_fashion_packing
+    render_type: upload
+    issue_type: quality_issue_fashion_packing
+  tags: [button, quality, fashion]
+
+- id: btn_quality_003
+  description: "flow_quality_electronics: not_working → flow_quality_electronics_refund"
+  category: button_routing
+  subcategory: quality
+  input:
+    message: "not_working"
+    message_type: option_select
+    option_id: not_working
+    context:
+      flow_step: flow_quality_electronics
+      turn_count: 3
+  expect:
+    next_context.flow_step: flow_quality_electronics_refund
+    render_type: upload
+    upload_config.video: true
+    issue_type: quality_issue_electronics
+  tags: [button, quality, electronics]
+
+# ── DELIVERY FLOW ─────────────────────────────────────────────────────────────
+- id: btn_delivery_001
+  description: "flow_delivery_instructions: no_bell → flow_di_simple"
+  category: button_routing
+  subcategory: delivery
+  input:
+    message: "no_bell"
+    message_type: option_select
+    option_id: no_bell
+    context:
+      flow_step: flow_delivery_instructions
+      turn_count: 2
+  expect:
+    next_context.flow_step: flow_di_simple
+    render_type: options
+    message_contains: instruction has been noted
+  tags: [button, delivery]
+
+- id: btn_delivery_002
+  description: "flow_delivery_instructions: directions → flow_di_directions"
+  category: button_routing
+  subcategory: delivery
+  input:
+    message: "directions"
+    message_type: option_select
+    option_id: directions
+    context:
+      flow_step: flow_delivery_instructions
+      turn_count: 2
+  expect:
+    next_context.flow_step: flow_di_directions
+    render_type: text_input
+  tags: [button, delivery]
+
+- id: btn_delivery_003
+  description: "flow_di_simple: more_instr → back to flow_delivery_instructions (loop)"
+  category: button_routing
+  subcategory: delivery
+  input:
+    message: "more_instr"
+    message_type: option_select
+    option_id: more_instr
+    context:
+      flow_step: flow_di_simple
+      turn_count: 3
+  expect:
+    next_context.flow_step: flow_delivery_instructions
+    options_count_min: 5
+  tags: [button, delivery]
+
+# ── COUPON FLOW ───────────────────────────────────────────────────────────────
+- id: btn_coupon_001
+  description: "flow_coupon: forgot → flow_coupon_forgot"
+  category: button_routing
+  subcategory: coupon
+  input:
+    message: "forgot"
+    message_type: option_select
+    option_id: forgot
+    context:
+      flow_step: flow_coupon
+      turn_count: 2
+  expect:
+    next_context.flow_step: flow_coupon_forgot
+    message_contains: coupon is still available
+  tags: [button, coupon]
+
+- id: btn_coupon_002
+  description: "flow_coupon: find → flow_coupon_find"
+  category: button_routing
+  subcategory: coupon
+  input:
+    message: "find"
+    message_type: option_select
+    option_id: find
+    context:
+      flow_step: flow_coupon
+      turn_count: 2
+  expect:
+    next_context.flow_step: flow_coupon_find
+    message_contains: APPLY COUPON
+  tags: [button, coupon]
+
+# ── ESCALATION via flow button ────────────────────────────────────────────────
+- id: btn_escalate_001
+  description: "flow_delayed_agent: ok → ESCALATE"
+  category: button_routing
+  subcategory: escalation
+  input:
+    message: "ok"
+    message_type: option_select
+    option_id: ok
+    context:
+      flow_step: flow_delayed_agent
+      turn_count: 4
+  expect:
+    escalate: true
+    escalate_reason_contains: flow_endpoint
+    render_type: handover
+  tags: [button, escalation]
+
+- id: btn_escalate_002
+  description: "flow_ticket_confirmed: agent → ESCALATE"
+  category: button_routing
+  subcategory: escalation
+  input:
+    message: "agent"
+    message_type: option_select
+    option_id: agent
+    context:
+      flow_step: flow_ticket_confirmed
+      turn_count: 5
+  expect:
+    escalate: true
+    render_type: handover
+  tags: [button, escalation]

@@ -1,0 +1,224 @@
+# Multi-turn cancellation flow tests
+
+- id: flow_cancel_fb_within_window
+  description: "Cancel FB order within 30s — full resolution path"
+  category: flow
+  subcategory: cancel
+  skip_order_api: true
+  tags: [flow, cancel, fb]
+  turns:
+    - turn: 1
+      description: "User types cancel intent"
+      input:
+        message: "cancel my order"
+        message_type: text
+      expect:
+        nlu_intent: cancel_order
+        render_type: options
+        next_context.flow_step: flow_cancel_detect
+
+    - turn: 2
+      description: "Select FB category"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_cancel_fb, flow_cancel_fb]
+
+    - turn: 3
+      description: "Confirm order placed within 30s"
+      input_requires_step: flow_cancel_fb
+      input:
+        message: "yes"
+        message_type: option_select
+        option_id: "yes"
+      expect:
+        next_context.flow_step: flow_cancel_fb_reason
+        render_type: options
+        options_include_id: [duplicate, add_items, price, wrong, not_avail]
+
+    - turn: 4
+      description: "Select reason: duplicate"
+      input:
+        message: "duplicate"
+        message_type: option_select
+        option_id: duplicate
+      expect:
+        next_context.flow_step: flow_cancel_done
+        render_type: options
+        message_contains: successfully cancelled
+
+    - turn: 5
+      description: "Close conversation"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+        render_type: options
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_cancel_fb_outside_window
+  description: "Cancel FB order after cancellation window — rejected"
+  category: flow
+  subcategory: cancel
+  skip_order_api: true
+  tags: [flow, cancel, fb]
+  turns:
+    - turn: 1
+      description: "User types cancel intent"
+      input:
+        message: "cancel order"
+        message_type: text
+      expect:
+        nlu_intent: cancel_order
+        render_type: options
+
+    - turn: 2
+      description: "Select FB category"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_cancel_fb, flow_cancel_fb]
+
+    - turn: 3
+      description: "Confirm order placed more than 30s ago"
+      input_requires_step: flow_cancel_fb
+      input:
+        message: "no"
+        message_type: option_select
+        option_id: "no"
+      expect:
+        next_context.flow_step: flow_cancel_elapsed
+        render_type: options
+        message_contains: cancellation time
+
+    - turn: 4
+      description: "Close"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_cancel_grocery_not_home
+  description: "Cancel grocery order — not at home — reschedule path"
+  category: flow
+  subcategory: cancel
+  skip_order_api: true
+  tags: [flow, cancel, grocery]
+  turns:
+    - turn: 1
+      description: "User types cancel intent"
+      input:
+        message: "I want to cancel my order"
+        message_type: text
+      expect:
+        nlu_intent: cancel_order
+
+    - turn: 2
+      description: "Select fashion (uses grocery reason flow)"
+      input:
+        message: "fashion"
+        message_type: option_select
+        option_id: fashion
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_cancel_fashion, flow_cancel_fashion]
+
+    - turn: 3
+      description: "Confirm within cancellation window"
+      input_requires_step: flow_cancel_fashion
+      input:
+        message: "yes"
+        message_type: option_select
+        option_id: "yes"
+      expect:
+        next_context.flow_step: flow_cancel_grocery_reason
+        options_include_id: [duplicate, add_items, price, wrong, not_avail, not_home]
+
+    - turn: 4
+      description: "Select not_home reason → reschedule offer"
+      input:
+        message: "not_home"
+        message_type: option_select
+        option_id: not_home
+      expect:
+        next_context.flow_step: flow_cancel_reschedule
+        render_type: options
+        options_include_id: [reschedule, cancel]
+
+    - turn: 5
+      description: "Choose to cancel anyway"
+      input:
+        message: "cancel"
+        message_type: option_select
+        option_id: cancel
+      expect:
+        next_context.flow_step: flow_cancel_done
+        message_contains: successfully cancelled
+
+
+- id: flow_cancel_reschedule_accepted
+  description: "Cancel fashion order — reschedule accepted"
+  category: flow
+  subcategory: cancel
+  skip_order_api: true
+  tags: [flow, cancel, fashion]
+  turns:
+    - turn: 1
+      description: "User types cancel intent"
+      input:
+        message: "cancel order"
+        message_type: text
+      expect:
+        nlu_intent: cancel_order
+
+    - turn: 2
+      description: "Select fashion category"
+      input:
+        message: "fashion"
+        message_type: option_select
+        option_id: fashion
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_cancel_fashion, flow_cancel_fashion]
+
+    - turn: 3
+      description: "Confirm within window"
+      input_requires_step: flow_cancel_fashion
+      input:
+        message: "yes"
+        message_type: option_select
+        option_id: "yes"
+      expect:
+        next_context.flow_step: flow_cancel_grocery_reason
+
+    - turn: 4
+      description: "Not available to pickup → reschedule"
+      input:
+        message: "not_avail"
+        message_type: option_select
+        option_id: not_avail
+      expect:
+        next_context.flow_step: flow_cancel_reschedule
+
+    - turn: 5
+      description: "Accept reschedule"
+      input:
+        message: "reschedule"
+        message_type: option_select
+        option_id: reschedule
+      expect:
+        next_context.flow_step: flow_cancel_rescheduled
+        message_contains: rescheduled

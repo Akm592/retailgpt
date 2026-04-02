@@ -1,0 +1,140 @@
+# Fallback behaviour tests
+# These verify the bot shows a friendly message instead of silently showing the main menu
+# when it receives unrecognised input.
+
+# ── Fresh-session unknown input ───────────────────────────────────────────────
+- id: fallback_fresh_session_001
+  description: "Completely unrelated text at fresh session → friendly fallback with full menu"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "what is the capital of France"
+    message_type: text
+  expect:
+    nlu_intent: unknown
+    escalate: false
+    render_type: options
+    next_context.flow_step: flow_fallback
+    message_contains: "didn't quite understand"
+    options_count_min: 10
+  tags: [llm, english, fallback]
+
+- id: fallback_fresh_session_002
+  description: "Gibberish at fresh session → friendly fallback"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "xkzqwerty blorpzorp zzz"
+    message_type: text
+  expect:
+    nlu_intent: unknown
+    escalate: false
+    render_type: options
+    next_context.flow_step: flow_fallback
+    message_contains: "didn't quite understand"
+  tags: [llm, english, fallback]
+
+# ── Mid-flow unknown input ────────────────────────────────────────────────────
+- id: fallback_midflow_001
+  description: "Unrelated text mid-flow → re-renders current step with nudge message"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "tell me a joke"
+    message_type: text
+    context:
+      flow_step: flow_cancel_detect
+      turn_count: 2
+  expect:
+    nlu_intent: unknown
+    escalate: false
+    render_type: options
+    next_context.flow_step: flow_cancel_detect
+    message_contains: "didn't quite understand"
+    options_include_id: [fb, fashion, electronics]
+  tags: [llm, english, fallback]
+
+- id: fallback_midflow_002
+  description: "Gibberish mid-flow quality step → re-renders current step options"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "asdfghjkl qwerty zxcvbnm"
+    message_type: text
+    context:
+      flow_step: flow_quality_fb
+      turn_count: 3
+  expect:
+    nlu_intent: unknown
+    escalate: false
+    render_type: options
+    next_context.flow_step: flow_quality_fb
+    message_contains: "didn't quite understand"
+    options_include_id: [stale, burnt, taste, spillage]
+  tags: [llm, english, fallback]
+
+# ── text_input step with native text ────────────────────────────────────────
+- id: fallback_text_input_001
+  description: "Typing text at flow_di_directions → follows * transition without NLU"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "Second gate on the left, blue building, flat 4B"
+    message_type: text
+    context:
+      flow_step: flow_di_directions
+      turn_count: 3
+  expect:
+    escalate: false
+    render_type: options
+    next_context.flow_step: flow_di_simple
+    message_contains: instruction has been noted
+  tags: [english, fallback]
+
+- id: fallback_text_input_002
+  description: "Typing neighbour details at flow_di_neighbour → follows * transition"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "Priya Sharma, 9988776655, House 12B"
+    message_type: text
+    context:
+      flow_step: flow_di_neighbour
+      turn_count: 3
+  expect:
+    escalate: false
+    render_type: options
+    next_context.flow_step: flow_di_simple
+    message_contains: instruction has been noted
+  tags: [english, fallback]
+
+# ── Fallback menu options still work ─────────────────────────────────────────
+- id: fallback_recovery_001
+  description: "After fallback, user can pick a valid option and resume flow"
+  category: flow
+  subcategory: fallback
+  tags: [flow, fallback, llm]
+  turns:
+    - turn: 1
+      description: "Unrelated input → fallback menu"
+      input:
+        message: "what is the weather today"
+        message_type: text
+      expect:
+        nlu_intent: unknown
+        render_type: options
+        next_context.flow_step: flow_fallback
+        message_contains: "didn't quite understand"
+
+    - turn: 2
+      description: "User picks cancel from fallback menu → flow resumes normally"
+      input:
+        message: "cancel"
+        message_type: option_select
+        option_id: cancel
+      expect:
+        next_context.flow_step: flow_cancel_detect
+        render_type: options
+
+  final_assertions:
+    escalate: false

@@ -9,6 +9,42 @@ from typing import Dict, Any
 
 FLOWS: Dict[str, Dict[str, Any]] = {
 
+    # ── Fallback: shown when the bot doesn't understand the input ────────────
+    "flow_fallback": {
+        "render": {
+            "render_type": "options",
+            "message": (
+                "I'm sorry, I didn't quite understand that. 😊 "
+                "No worries — here's what I can help you with today. "
+                "Please choose an option:"
+            ),
+            "options": [
+                {"id": "order_status",          "label": "📦 What happened to my order?"},
+                {"id": "cancel",                "label": "❌ I want to cancel my order"},
+                {"id": "delayed",               "label": "⏱️ My order is delayed"},
+                {"id": "items_issue",           "label": "🛍️ Issue with items delivered"},
+                {"id": "quality_issue",         "label": "🔍 I have a quality issue"},
+                {"id": "quantity_issue",        "label": "⚖️ Quantity issue with my food"},
+                {"id": "delivery_instructions", "label": "🛵 Instructions to delivery partner"},
+                {"id": "modify",                "label": "✏️ I want to modify items in my order"},
+                {"id": "coupon",                "label": "🎟️ Coupon related query"},
+                {"id": "payment",               "label": "💳 Payment & billing query"},
+            ],
+        },
+        "transitions": {
+            "order_status":          "flow_order_status",
+            "cancel":                "flow_cancel_detect",
+            "delayed":               "flow_delayed",
+            "items_issue":           "flow_items_detect",
+            "quality_issue":         "flow_quality_detect",
+            "quantity_issue":        "flow_quantity",
+            "delivery_instructions": "flow_delivery_instructions",
+            "modify":                "flow_modify",
+            "coupon":                "flow_coupon",
+            "payment":               "flow_payment",
+        },
+    },
+
     # ── FLOW 0: Main Menu ────────────────────────────────────────────────────
     "main": {
         "render": {

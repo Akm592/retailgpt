@@ -1,0 +1,238 @@
+# Multi-turn order status and delayed order flow tests
+
+- id: flow_status_fb
+  description: "Order status — FB — full path to resolution"
+  category: flow
+  subcategory: order_status
+  skip_order_api: true
+  tags: [flow, order_status, fb]
+  turns:
+    - turn: 1
+      description: "Text: where is my order"
+      input:
+        message: "where is my order"
+        message_type: text
+      expect:
+        nlu_intent: track_order
+        nlu_source: keyword
+        render_type: options
+        next_context.flow_step: flow_order_status
+        options_include_id: [fb, fashion, electronics]
+
+    - turn: 2
+      description: "Select FB category"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_status_fb, flow_order_status_fb]
+
+    - turn: 3
+      description: "Status shown — close"
+      input_requires_step: flow_order_status_fb
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_status_fashion
+  description: "Order status — Fashion"
+  category: flow
+  subcategory: order_status
+  skip_order_api: true
+  tags: [flow, order_status, fashion]
+  turns:
+    - turn: 1
+      description: "Text: order status keyword"
+      input:
+        message: "order status"
+        message_type: text
+      expect:
+        nlu_intent: track_order
+        nlu_source: keyword
+
+    - turn: 2
+      description: "Select fashion"
+      input:
+        message: "fashion"
+        message_type: option_select
+        option_id: fashion
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_status_fashion, flow_order_status_fashion]
+
+    - turn: 3
+      description: "Status shown — more questions"
+      input_requires_step: flow_order_status_fashion
+      input:
+        message: "more"
+        message_type: option_select
+        option_id: more
+      expect:
+        next_context.flow_step: main
+
+
+- id: flow_status_electronics
+  description: "Order status — Electronics"
+  category: flow
+  subcategory: order_status
+  skip_order_api: true
+  tags: [flow, order_status, electronics]
+  turns:
+    - turn: 1
+      description: "Text: track order"
+      input:
+        message: "track my order"
+        message_type: text
+      expect:
+        nlu_intent: track_order
+        nlu_source: keyword
+
+    - turn: 2
+      description: "Select electronics"
+      input:
+        message: "electronics"
+        message_type: option_select
+        option_id: electronics
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_status_electronics, flow_order_status_electronics]
+
+    - turn: 3
+      description: "Done"
+      input_requires_step: flow_order_status_electronics
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+
+- id: flow_delayed_late_then_done
+  description: "Delayed order — genuinely late — accept and close"
+  category: flow
+  subcategory: delayed
+  tags: [flow, delayed]
+  turns:
+    - turn: 1
+      description: "Text: order is delayed"
+      input:
+        message: "My order is delayed"
+        message_type: text
+      expect:
+        nlu_intent: delayed_order
+        render_type: options
+        next_context.flow_step: flow_delayed
+        options_include_id: [ontime, late]
+
+    - turn: 2
+      description: "Select: order is genuinely late"
+      input:
+        message: "late"
+        message_type: option_select
+        option_id: late
+      expect:
+        next_context.flow_step: flow_delayed_late
+        render_type: options
+        options_include_id: [menu, agent, done]
+
+    - turn: 3
+      description: "Accept and close"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_delayed_ontime
+  description: "Delayed order — actually still on time"
+  category: flow
+  subcategory: delayed
+  tags: [flow, delayed]
+  turns:
+    - turn: 1
+      description: "Text: delayed order"
+      input:
+        message: "My order is delayed"
+        message_type: text
+      expect:
+        nlu_intent: delayed_order
+        next_context.flow_step: flow_delayed
+
+    - turn: 2
+      description: "Select: still showing on time"
+      input:
+        message: "ontime"
+        message_type: option_select
+        option_id: ontime
+      expect:
+        next_context.flow_step: flow_delayed_ontime
+        message_contains: on track
+
+    - turn: 3
+      description: "Close"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+
+- id: flow_delayed_agent_escalation
+  description: "Delayed order — late — request agent → escalation"
+  category: flow
+  subcategory: delayed
+  tags: [flow, delayed, escalation]
+  turns:
+    - turn: 1
+      description: "Text: delayed order"
+      input:
+        message: "My order is delayed"
+        message_type: text
+      expect:
+        nlu_intent: delayed_order
+
+    - turn: 2
+      description: "Order is late"
+      input:
+        message: "late"
+        message_type: option_select
+        option_id: late
+      expect:
+        next_context.flow_step: flow_delayed_late
+
+    - turn: 3
+      description: "Request agent"
+      input:
+        message: "agent"
+        message_type: option_select
+        option_id: agent
+      expect:
+        next_context.flow_step: flow_delayed_agent
+        options_include_id: [ok]
+
+    - turn: 4
+      description: "Confirm wait for agent"
+      input:
+        message: "ok"
+        message_type: option_select
+        option_id: ok
+      expect:
+        escalate: true
+        escalate_reason_contains: flow_endpoint
+        render_type: handover
+
+  final_assertions:
+    escalate: true

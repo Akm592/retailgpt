@@ -1,0 +1,209 @@
+# Multi-turn missing/wrong item flow tests
+
+- id: flow_items_fb_incorrect
+  description: "Wrong items delivered — FB — upload → ticket"
+  category: flow
+  subcategory: items
+  skip_order_api: true
+  tags: [flow, items, fb]
+  turns:
+    - turn: 1
+      description: "Text: wrong item received"
+      input:
+        message: "I got wrong items in my order"
+        message_type: text
+      expect:
+        nlu_intent: wrong_item
+        render_type: options
+        next_context.flow_step: flow_items_detect
+
+    - turn: 2
+      description: "Select FB category"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_items_fb, flow_items_fb]
+
+    - turn: 3
+      description: "Select incorrect items issue"
+      input_requires_step: flow_items_fb
+      input:
+        message: "incorrect"
+        message_type: option_select
+        option_id: incorrect
+      expect:
+        next_context.flow_step: flow_items_fb_incorrect
+        render_type: upload
+        ticket_raised: true
+        issue_type: incorrect_item
+        upload_config.min_photos: 3
+        upload_config.video: false
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
+        message_contains: ticket has been raised
+
+    - turn: 5
+      description: "Done, no agent"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_items_fb_missing
+  description: "Missing items — FB — upload → ticket"
+  category: flow
+  subcategory: items
+  skip_order_api: true
+  tags: [flow, items, fb]
+  turns:
+    - turn: 1
+      description: "Text: missing item keyword"
+      input:
+        message: "missing item in my order"
+        message_type: text
+      expect:
+        nlu_intent: missing_item
+        nlu_source: keyword
+
+    - turn: 2
+      description: "Select FB"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_items_fb, flow_items_fb]
+
+    - turn: 3
+      description: "Select missing items"
+      input_requires_step: flow_items_fb
+      input:
+        message: "missing"
+        message_type: option_select
+        option_id: missing
+      expect:
+        next_context.flow_step: flow_items_fb_missing
+        render_type: upload
+        ticket_raised: true
+        issue_type: missing_item
+        upload_config.min_photos: 2
+        upload_config.video: false
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
+
+
+- id: flow_items_fashion_incorrect
+  description: "Incorrect items — Fashion — upload → ticket"
+  category: flow
+  subcategory: items
+  skip_order_api: true
+  tags: [flow, items, fashion]
+  turns:
+    - turn: 1
+      description: "Text: item not received"
+      input:
+        message: "item not received"
+        message_type: text
+      expect:
+        nlu_intent: missing_item
+        nlu_source: keyword
+
+    - turn: 2
+      description: "Select fashion"
+      input:
+        message: "fashion"
+        message_type: option_select
+        option_id: fashion
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_items_fashion, flow_items_fashion]
+
+    - turn: 3
+      description: "Select incorrect"
+      input_requires_step: flow_items_fashion
+      input:
+        message: "incorrect"
+        message_type: option_select
+        option_id: incorrect
+      expect:
+        next_context.flow_step: flow_items_fashion_ticket
+        render_type: upload
+        ticket_raised: true
+        issue_type: incorrect_or_missing_item_fashion
+        upload_config.min_photos: 3
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
+
+
+- id: flow_items_electronics_missing
+  description: "Missing items — Electronics — upload → ticket"
+  category: flow
+  subcategory: items
+  skip_order_api: true
+  tags: [flow, items, electronics]
+  turns:
+    - turn: 1
+      description: "Text: item missing"
+      input:
+        message: "item missing from my electronics order"
+        message_type: text
+      expect:
+        nlu_intent: missing_item
+
+    - turn: 2
+      description: "Select electronics"
+      input:
+        message: "electronics"
+        message_type: option_select
+        option_id: electronics
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_items_electronics, flow_items_electronics]
+
+    - turn: 3
+      description: "Select missing"
+      input_requires_step: flow_items_electronics
+      input:
+        message: "missing"
+        message_type: option_select
+        option_id: missing
+      expect:
+        next_context.flow_step: flow_items_electronics_ticket
+        render_type: upload
+        issue_type: incorrect_or_missing_item_electronics
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
