@@ -75,6 +75,11 @@ def process_turn(
         if intent == RetailIntent.REQUEST_AGENT:
             return FlowResult({}, None, None, True, "customer_requested")
 
+        # Greetings always land on the main welcome menu
+        if intent == RetailIntent.GREETING:
+            logger.info("Greeting detected → main menu")
+            return FlowResult(dict(FLOWS["main"]["render"]), "main", "main", False, None)
+
         intent_steps = INTENT_TO_STEP.get(intent, {})
         cat = category if category else RetailCategory.UNKNOWN
         step_id = intent_steps.get(cat) or intent_steps.get("*") or "main"

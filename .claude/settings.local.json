@@ -14,7 +14,9 @@
       "Bash(find /home/ashish/Documents/GitHub/Reatailgpt-mvp -type f -name \"*.py\" -exec wc -l {} +)",
       "Bash(grep -r \"sqlalchemy\\\\|psycopg\\\\|database\\\\|sql\" /home/ashish/Documents/GitHub/Reatailgpt-mvp --include=*.py --include=*.txt)",
       "Bash(grep:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(find:*)",
+      "Read(//tmp/**)"
     ]
   }
 }

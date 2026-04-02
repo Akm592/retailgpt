@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 import os
+from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -12,6 +13,23 @@ from supabase import AsyncClient, acreate_client
 
 load_dotenv()
 logger = logging.getLogger("human_agent_scorer")
+
+# ---------------------------------------------------------------------------
+# Shared Supabase client (module-level singleton used by scorer + app writes)
+# ---------------------------------------------------------------------------
+
+_shared_db: Optional[AsyncClient] = None
+
+
+async def get_db() -> AsyncClient:
+    global _shared_db
+    if _shared_db is None:
+        url = os.getenv("SUPABASE_URL")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+        if not url or not key:
+            raise ValueError("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set")
+        _shared_db = await acreate_client(url, key)
+    return _shared_db
 
 RUBRIC_WEIGHTS = {
     "resolution_quality":              0.20,
@@ -116,13 +134,7 @@ class AgentScorer:
         logger.info("Human AgentScorer initialised")
 
     async def _get_db(self) -> AsyncClient:
-        if self._db is None:
-            url = os.getenv("SUPABASE_URL")
-            key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-            if not url or not key:
-                raise ValueError("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set")
-            self._db = await acreate_client(url, key)
-        return self._db
+        return await get_db()
 
     # ------------------------------------------------------------------
     # Per-handover scoring
@@ -449,6 +461,378 @@ class AgentScorer:
 
         return "\n".join(lines)
 
+    # ------------------------------------------------------------------
+    # Team performance (manager view — stats only, no Gemini per agent)
+    # ------------------------------------------------------------------
+
+    async def team_performance(
+        self,
+        support_group: str,
+        start_date: str | None,
+        end_date: str | None,
+    ) -> dict:
+        db = await self._get_db()
+
+        # Q1: all agents in the group
+        agents_q = await db.table("users").select("id,name,support_group").eq("support_group", support_group).execute()
+        agents = agents_q.data or []
+        if not agents:
+            raise LookupError(f"support_group_not_found:{support_group}")
+
+        agent_ids = [a["id"] for a in agents]
+
+        # Q2: all handovers for all agents in one query
+        query = db.table("handovers").select("id,session_id,status,created_at,resolved_at,agent_id").in_("agent_id", agent_ids)
+        if start_date:
+            query = query.gte("created_at", start_date)
+        if end_date:
+            query = query.lte("created_at", f"{end_date}T23:59:59Z")
+        handovers_q = await query.execute()
+        all_handovers = handovers_q.data or []
+
+        # Group handovers by agent_id
+        handovers_by_agent: dict = defaultdict(list)
+        for h in all_handovers:
+            handovers_by_agent[h["agent_id"]].append(h)
+
+        # Q3 + Q4 concurrently: surveys and latest cached scores
+        all_handover_ids = [h["id"] for h in all_handovers]
+        if all_handover_ids:
+            surveys_q, cached_q = await asyncio.gather(
+                db.table("support_surveys").select("*").in_("handover_id", all_handover_ids).execute(),
+                db.table("agent_scores").select("agent_id,overall_score,evaluated_at").in_("agent_id", agent_ids).order("evaluated_at", desc=True).execute(),
+            )
+            all_surveys = surveys_q.data or []
+            cached_scores = cached_q.data or []
+        else:
+            all_surveys, cached_scores = [], []
+
+        # Map surveys by agent via handover
+        handover_to_agent = {h["id"]: h["agent_id"] for h in all_handovers}
+        surveys_by_agent: dict = defaultdict(list)
+        for s in all_surveys:
+            aid = handover_to_agent.get(s["handover_id"])
+            if aid:
+                surveys_by_agent[aid].append(s)
+
+        # Latest cached score per agent (already sorted desc by evaluated_at)
+        latest_score_by_agent: dict = {}
+        for c in cached_scores:
+            aid = c["agent_id"]
+            if aid not in latest_score_by_agent:
+                latest_score_by_agent[aid] = c["overall_score"]
+
+        # Build per-agent summaries
+        agent_summaries = []
+        for agent in agents:
+            aid = agent["id"]
+            agent_summaries.append({
+                "agent_id": aid,
+                "agent_name": agent.get("name"),
+                "resolution_stats": self._compute_resolution_stats(handovers_by_agent[aid]),
+                "survey_stats": self._compute_survey_stats(surveys_by_agent[aid]),
+                "timing_stats": self._compute_timing_stats(handovers_by_agent[aid]),
+                "overall_score": latest_score_by_agent.get(aid),
+            })
+
+        agent_summaries.sort(
+            key=lambda a: (a["overall_score"] is not None, a["overall_score"] or 0.0),
+            reverse=True,
+        )
+
+        # Group-level aggregates
+        total_handovers_count = sum(a["resolution_stats"]["total"] for a in agent_summaries)
+        total_resolved = sum(a["resolution_stats"]["resolved"] for a in agent_summaries)
+        all_scores = [a["overall_score"] for a in agent_summaries if a["overall_score"] is not None]
+
+        sat_vals, nps_vals = [], []
+        for a in agent_summaries:
+            ss = a["survey_stats"]
+            n = ss["total_responses"]
+            if ss["avg_overall_satisfaction"] is not None:
+                sat_vals.extend([ss["avg_overall_satisfaction"]] * n)
+            if ss["avg_nps"] is not None:
+                nps_vals.extend([ss["avg_nps"]] * n)
+
+        return {
+            "support_group": support_group,
+            "period": {"start": start_date or "all time", "end": end_date or "all time"},
+            "agents": agent_summaries,
+            "group_stats": {
+                "total_agents": len(agents),
+                "total_handovers": total_handovers_count,
+                "total_resolved": total_resolved,
+                "group_resolution_rate": round(total_resolved / total_handovers_count, 4) if total_handovers_count > 0 else 0.0,
+                "avg_score": round(sum(all_scores) / len(all_scores), 2) if all_scores else None,
+                "total_survey_responses": sum(a["survey_stats"]["total_responses"] for a in agent_summaries),
+                "avg_overall_satisfaction": round(sum(sat_vals) / len(sat_vals), 2) if sat_vals else None,
+                "avg_nps": round(sum(nps_vals) / len(nps_vals), 2) if nps_vals else None,
+            },
+        }
+
+    # ------------------------------------------------------------------
+    # Org performance (admin view — cross-group, stats only)
+    # ------------------------------------------------------------------
+
+    async def org_performance(
+        self,
+        start_date: str | None,
+        end_date: str | None,
+    ) -> dict:
+        db = await self._get_db()
+
+        # Q1: all agents (filter out non-agent users without support_group)
+        agents_q = await db.table("users").select("id,name,support_group").not_.is_("support_group", "null").execute()
+        agents = agents_q.data or []
+        support_groups = list({a["support_group"] for a in agents if a.get("support_group")})
+
+        # Q2: all handovers across all groups
+        query = db.table("handovers").select("id,status,created_at,resolved_at,agent_id,support_group")
+        if start_date:
+            query = query.gte("created_at", start_date)
+        if end_date:
+            query = query.lte("created_at", f"{end_date}T23:59:59Z")
+        handovers_q = await query.execute()
+        all_handovers = handovers_q.data or []
+
+        # Group handovers by support_group (use handover.support_group directly)
+        handovers_by_group: dict = defaultdict(list)
+        for h in all_handovers:
+            grp = h.get("support_group") or "unknown"
+            handovers_by_group[grp].append(h)
+
+        # Q3 + Q4 concurrently: surveys and cached scores
+        all_handover_ids = [h["id"] for h in all_handovers]
+        agent_ids = [a["id"] for a in agents]
+        if all_handover_ids:
+            surveys_q = await db.table("support_surveys").select("handover_id,overall_satisfaction,nps,response_time,helpfulness").in_("handover_id", all_handover_ids).execute()
+            all_surveys = surveys_q.data or []
+        else:
+            all_surveys = []
+
+        if agent_ids:
+            cached_q = await db.table("agent_scores").select("agent_id,overall_score").in_("agent_id", agent_ids).execute()
+            cached_scores = cached_q.data or []
+        else:
+            cached_scores = []
+
+        handover_to_group = {h["id"]: (h.get("support_group") or "unknown") for h in all_handovers}
+        surveys_by_group: dict = defaultdict(list)
+        for s in all_surveys:
+            grp = handover_to_group.get(s["handover_id"], "unknown")
+            surveys_by_group[grp].append(s)
+
+        agent_to_group = {a["id"]: (a.get("support_group") or "unknown") for a in agents}
+        scores_by_group: dict = defaultdict(list)
+        for c in cached_scores:
+            grp = agent_to_group.get(c["agent_id"], "unknown")
+            if c.get("overall_score") is not None:
+                scores_by_group[grp].append(c["overall_score"])
+
+        # Build group summaries
+        group_summaries = []
+        for grp in support_groups:
+            grp_handovers = handovers_by_group[grp]
+            grp_surveys = surveys_by_group[grp]
+            grp_scores = scores_by_group[grp]
+            grp_agent_count = len([a for a in agents if a.get("support_group") == grp])
+
+            res_stats = self._compute_resolution_stats(grp_handovers)
+            surv_stats = self._compute_survey_stats(grp_surveys)
+
+            group_summaries.append({
+                "support_group": grp,
+                "agent_count": grp_agent_count,
+                "avg_score": round(sum(grp_scores) / len(grp_scores), 2) if grp_scores else None,
+                "resolution_stats": res_stats,
+                "survey_stats": surv_stats,
+            })
+
+        # Org-wide aggregates
+        total_handovers_count = sum(g["resolution_stats"]["total"] for g in group_summaries)
+        total_resolved = sum(g["resolution_stats"]["resolved"] for g in group_summaries)
+        all_scores = [g["avg_score"] for g in group_summaries if g["avg_score"] is not None]
+
+        sat_vals, nps_vals = [], []
+        for g in group_summaries:
+            ss = g["survey_stats"]
+            n = ss["total_responses"]
+            if ss["avg_overall_satisfaction"] is not None:
+                sat_vals.extend([ss["avg_overall_satisfaction"]] * n)
+            if ss["avg_nps"] is not None:
+                nps_vals.extend([ss["avg_nps"]] * n)
+
+        return {
+            "period": {"start": start_date or "all time", "end": end_date or "all time"},
+            "groups": group_summaries,
+            "org_stats": {
+                "total_groups": len(support_groups),
+                "total_agents": len(agents),
+                "total_handovers": total_handovers_count,
+                "total_resolved": total_resolved,
+                "org_resolution_rate": round(total_resolved / total_handovers_count, 4) if total_handovers_count > 0 else 0.0,
+                "avg_score": round(sum(all_scores) / len(all_scores), 2) if all_scores else None,
+                "total_survey_responses": sum(g["survey_stats"]["total_responses"] for g in group_summaries),
+                "avg_overall_satisfaction": round(sum(sat_vals) / len(sat_vals), 2) if sat_vals else None,
+                "avg_nps": round(sum(nps_vals) / len(nps_vals), 2) if nps_vals else None,
+            },
+        }
+
+    # ------------------------------------------------------------------
+    # Funnel breakdown (AI resolved vs escalated vs abandoned)
+    # ------------------------------------------------------------------
+
+    async def funnel(
+        self,
+        start_date: str | None,
+        end_date: str | None,
+        support_group: str | None = None,
+    ) -> dict:
+        db = await self._get_db()
+
+        # Fetch sessions with outcome columns
+        query = db.table("sessions").select("id,outcome,escalation_reason,ai_turns,fallback_count,created_at")
+        if start_date:
+            query = query.gte("created_at", start_date)
+        if end_date:
+            query = query.lte("created_at", f"{end_date}T23:59:59Z")
+        sessions_q = await query.execute()
+        sessions = sessions_q.data or []
+
+        # Optional: narrow to sessions that escalated into a specific support_group
+        if support_group:
+            handovers_q = await db.table("handovers").select("session_id").eq("support_group", support_group).execute()
+            group_session_ids = {h["session_id"] for h in (handovers_q.data or [])}
+            sessions = [s for s in sessions if s["id"] in group_session_ids]
+
+        outcome_counts: dict = {"resolved_by_ai": 0, "escalated": 0, "abandoned": 0, "open": 0}
+        escalation_reasons: dict = {}
+        for s in sessions:
+            outcome = s.get("outcome") or "open"
+            outcome_counts[outcome if outcome in outcome_counts else "open"] += 1
+            if outcome == "escalated" and s.get("escalation_reason"):
+                reason = s["escalation_reason"]
+                escalation_reasons[reason] = escalation_reasons.get(reason, 0) + 1
+
+        total = len(sessions)
+        def pct(n: int) -> float:
+            return round(n / total * 100, 1) if total > 0 else 0.0
+
+        # AI ratings from ai_session_feedback
+        query2 = db.table("ai_session_feedback").select("rating")
+        if start_date:
+            query2 = query2.gte("created_at", start_date)
+        if end_date:
+            query2 = query2.lte("created_at", f"{end_date}T23:59:59Z")
+        ratings_q = await query2.execute()
+        ratings = [r["rating"] for r in (ratings_q.data or []) if r.get("rating") is not None]
+
+        return {
+            "period": {"start": start_date or "all time", "end": end_date or "all time"},
+            "total_sessions": total,
+            "resolved_by_ai": outcome_counts["resolved_by_ai"],
+            "resolved_by_ai_pct": pct(outcome_counts["resolved_by_ai"]),
+            "escalated": outcome_counts["escalated"],
+            "escalated_pct": pct(outcome_counts["escalated"]),
+            "abandoned": outcome_counts["abandoned"],
+            "abandoned_pct": pct(outcome_counts["abandoned"]),
+            "open": outcome_counts["open"],
+            "avg_ai_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
+            "total_ai_ratings": len(ratings),
+            "escalation_reasons": escalation_reasons,
+        }
+
+    # ------------------------------------------------------------------
+    # AI performance metrics
+    # ------------------------------------------------------------------
+
+    async def ai_performance(
+        self,
+        start_date: str | None,
+        end_date: str | None,
+    ) -> dict:
+        db = await self._get_db()
+
+        # Fetch all sessions with AI metric columns
+        query = db.table("sessions").select("id,outcome,escalation_reason,ai_turns,fallback_count,created_at")
+        if start_date:
+            query = query.gte("created_at", start_date)
+        if end_date:
+            query = query.lte("created_at", f"{end_date}T23:59:59Z")
+        sessions_q = await query.execute()
+        sessions = sessions_q.data or []
+
+        resolved_ai = [s for s in sessions if s.get("outcome") == "resolved_by_ai"]
+        escalated = [s for s in sessions if s.get("outcome") == "escalated"]
+        total_actioned = len(resolved_ai) + len(escalated)
+
+        containment_rate = round(len(resolved_ai) / total_actioned, 4) if total_actioned > 0 else 0.0
+        bot_failure_rate = round(
+            len([s for s in sessions if (s.get("fallback_count") or 0) > 0]) / len(sessions), 4
+        ) if sessions else 0.0
+
+        ai_turns_resolved = [s["ai_turns"] for s in resolved_ai if s.get("ai_turns")]
+        ai_turns_escalated = [s["ai_turns"] for s in escalated if s.get("ai_turns")]
+
+        escalation_reasons: dict = {}
+        for s in escalated:
+            reason = s.get("escalation_reason")
+            if reason:
+                escalation_reasons[reason] = escalation_reasons.get(reason, 0) + 1
+
+        # AI ratings
+        query2 = db.table("ai_session_feedback").select("rating")
+        if start_date:
+            query2 = query2.gte("created_at", start_date)
+        if end_date:
+            query2 = query2.lte("created_at", f"{end_date}T23:59:59Z")
+        ratings_q = await query2.execute()
+        ratings = [r["rating"] for r in (ratings_q.data or []) if r.get("rating") is not None]
+
+        return {
+            "period": {"start": start_date or "all time", "end": end_date or "all time"},
+            "total_sessions": len(sessions),
+            "total_ai_resolved": len(resolved_ai),
+            "total_escalated": len(escalated),
+            "containment_rate": containment_rate,
+            "avg_ai_rating": round(sum(ratings) / len(ratings), 2) if ratings else None,
+            "total_ai_ratings": len(ratings),
+            "avg_turns_before_resolution": round(sum(ai_turns_resolved) / len(ai_turns_resolved), 1) if ai_turns_resolved else None,
+            "avg_turns_before_escalation": round(sum(ai_turns_escalated) / len(ai_turns_escalated), 1) if ai_turns_escalated else None,
+            "bot_failure_rate": bot_failure_rate,
+            "escalation_reasons": escalation_reasons,
+        }
+
+    # ------------------------------------------------------------------
+    # Score a handover and persist result to agent_scores cache
+    # ------------------------------------------------------------------
+
+    async def score_and_cache(self, handover_id: str) -> dict:
+        db = await self._get_db()
+        result = await self.score(handover_id)
+
+        cached = False
+        try:
+            await db.table("agent_scores").insert({
+                "handover_id": handover_id,
+                "agent_id": result.get("agent_id"),
+                "overall_score": result["overall_score"],
+                "rubric_scores": result["rubric_scores"],
+                "ai_summary": result["summary"],
+                "recommendations": result["recommendations"],
+            }).execute()
+            cached = True
+        except Exception as e:
+            logger.warning(f"Failed to cache score for handover {handover_id}: {e}")
+
+        return {
+            "handover_id": handover_id,
+            "agent_id": result.get("agent_id"),
+            "overall_score": result["overall_score"],
+            "cached": cached,
+            "scored_at": result["scored_at"],
+        }
+
     def _empty_performance_report(
         self,
         agent_id: str,
@@ -516,3 +900,37 @@ async def agent_performance(
     sample_limit: int = 5,
 ) -> dict:
     return await get_agent_scorer().performance(agent_id, start_date, end_date, sample_limit)
+
+
+async def team_performance_analytics(
+    support_group: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict:
+    return await get_agent_scorer().team_performance(support_group, start_date, end_date)
+
+
+async def org_performance_analytics(
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict:
+    return await get_agent_scorer().org_performance(start_date, end_date)
+
+
+async def funnel_analytics(
+    start_date: str | None = None,
+    end_date: str | None = None,
+    support_group: str | None = None,
+) -> dict:
+    return await get_agent_scorer().funnel(start_date, end_date, support_group)
+
+
+async def ai_performance_analytics(
+    start_date: str | None = None,
+    end_date: str | None = None,
+) -> dict:
+    return await get_agent_scorer().ai_performance(start_date, end_date)
+
+
+async def score_and_cache_handover(handover_id: str) -> dict:
+    return await get_agent_scorer().score_and_cache(handover_id)

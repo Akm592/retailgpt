@@ -108,6 +108,38 @@
     message_contains: instruction has been noted
   tags: [english, fallback]
 
+# ── Greeting inputs → main welcome ──────────────────────────────────────────
+- id: fallback_greeting_keyword_001
+  description: "'hello' (keyword) at fresh session → main welcome menu"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "hello"
+    message_type: text
+  expect:
+    nlu_intent: greeting
+    nlu_source: keyword
+    escalate: false
+    render_type: options
+    next_context.flow_step: main
+    message_contains: "Welcome to RetailGPT"
+  tags: [english, fallback, greeting]
+
+- id: fallback_greeting_llm_001
+  description: "'hi' (LLM) at fresh session → main welcome menu"
+  category: nlu
+  subcategory: fallback
+  input:
+    message: "hi"
+    message_type: text
+  expect:
+    nlu_intent: greeting
+    escalate: false
+    render_type: options
+    next_context.flow_step: main
+    message_contains: "Welcome to RetailGPT"
+  tags: [llm, english, fallback, greeting]
+
 # ── Fallback menu options still work ─────────────────────────────────────────
 - id: fallback_recovery_001
   description: "After fallback, user can pick a valid option and resume flow"
