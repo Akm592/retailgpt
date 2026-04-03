@@ -39,6 +39,7 @@ class ChatTurnResponse(BaseModel):
     nlu: Optional[NLUOutput] = None
     ticket_raised: bool = False
     issue_type: Optional[str] = None
+    group: Optional[str] = None
 
 
 class SummaryResponse(BaseModel):

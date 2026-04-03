@@ -17,7 +17,7 @@ Intent must be exactly one of:
 track_order, cancel_order, delayed_order, modify_order,
 quality_issue, missing_item, wrong_item,
 payment_query, coupon_query, delivery_instructions,
-request_agent, quantity_issue, unknown
+request_agent, quantity_issue, greeting, unknown
 
 Category must be exactly one of:
 fb, fashion, electronics, unknown
@@ -26,6 +26,7 @@ Sentiment must be exactly one of:
 positive, neutral, negative
 
 Rules for intent:
+- If message is purely a greeting with no support query (hi, hello, hey, namaste, namaskar, good morning, good evening, good afternoon, hii, heyy) -> intent = greeting
 - If message contains "agent", "human", "aadmi", "banda", "real person", "support agent", "koi insaan" -> intent = request_agent
 - If message contains "where is", "kahan hai", "track", "order status", "kab aayega" -> intent = track_order
 - If message contains "cancel", "band karo", "cancel karna" -> intent = cancel_order

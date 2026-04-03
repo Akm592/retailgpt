@@ -1,0 +1,219 @@
+# Escalation rule trigger tests — covers all 6 rules from engine/escalation.py
+
+# ── Rule 1: customer_requested ────────────────────────────────────────────────
+- id: esc_customer_requested_001
+  description: "Talk to agent keyword → immediate escalation"
+  category: escalation
+  subcategory: customer_requested
+  tags: [escalation, keyword]
+  turns:
+    - turn: 1
+      description: "User types 'talk to agent'"
+      input:
+        message: "talk to agent"
+        message_type: text
+      expect:
+        nlu_intent: request_agent
+        nlu_source: keyword
+        escalate: true
+        escalate_reason_contains: customer_requested
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+- id: esc_customer_requested_002
+  description: "Hinglish agent request → immediate escalation"
+  category: escalation
+  subcategory: customer_requested
+  tags: [escalation, keyword, hinglish]
+  turns:
+    - turn: 1
+      description: "koi insaan chahiye"
+      input:
+        message: "koi insaan chahiye"
+        message_type: text
+      expect:
+        nlu_intent: request_agent
+        escalate: true
+        escalate_reason_contains: customer_requested
+
+
+# ── Rule 2: bot_fallback (fallback_count >= 3) ────────────────────────────────
+- id: esc_bot_fallback_001
+  description: "Three consecutive gibberish inputs → bot fallback escalation on turn 3"
+  category: escalation
+  subcategory: bot_fallback
+  tags: [escalation]
+  turns:
+    - turn: 1
+      description: "Gibberish turn 1"
+      input:
+        message: "xkzqwerty asdfblorp zzzblorp123"
+        message_type: text
+      expect:
+        escalate: false
+
+    - turn: 2
+      description: "Gibberish turn 2 — fallback_count should be 2"
+      input:
+        message: "qwerrtyuio asdf zxcv poiuytre"
+        message_type: text
+      expect:
+        escalate: false
+
+    - turn: 3
+      description: "Gibberish turn 3 — fallback_count reaches 3 → escalate"
+      input:
+        message: "aaaaabbbbbcccccddddd eeeee fffff"
+        message_type: text
+      expect:
+        escalate: true
+        escalate_reason_contains: bot_fallback_limit_reached
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+# ── Rule 3: repeat_complaint ──────────────────────────────────────────────────
+- id: esc_repeat_complaint_001
+  description: "Repeat complaint with open ticket on same order → immediate escalation"
+  category: escalation
+  subcategory: repeat_complaint
+  tags: [escalation]
+  customer_id: "cust_repeat_test"
+  initial_context:
+    order_id: "ord_test_001"
+    open_handovers:
+      - id: "ticket_abc123"
+        order_id: "ord_test_001"
+        issue_type: "quality_issue"
+        status: "pending_assignment"
+  turns:
+    - turn: 1
+      description: "Quality issue on same order — repeat complaint"
+      input:
+        message: "quality issue"
+        message_type: text
+      expect:
+        nlu_intent: quality_issue
+        escalate: true
+        escalate_reason_contains: repeat_complaint
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+# ── Rule 4: payment_query_mandatory_escalation ────────────────────────────────
+- id: esc_payment_mandatory_001
+  description: "Payment query intent → mandatory escalation"
+  category: escalation
+  subcategory: payment_mandatory
+  tags: [escalation, payment, keyword]
+  turns:
+    - turn: 1
+      description: "Payment issue keyword"
+      input:
+        message: "payment issue"
+        message_type: text
+      expect:
+        nlu_intent: payment_query
+        nlu_source: keyword
+        escalate: true
+        escalate_reason_contains: payment_query_mandatory_escalation
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+- id: esc_payment_mandatory_002
+  description: "Paisa wapas (Hindi) → mandatory escalation"
+  category: escalation
+  subcategory: payment_mandatory
+  tags: [escalation, payment, keyword, hinglish]
+  turns:
+    - turn: 1
+      description: "Paisa wapas keyword"
+      input:
+        message: "paisa wapas chahiye"
+        message_type: text
+      expect:
+        nlu_intent: payment_query
+        escalate: true
+        escalate_reason_contains: payment_query_mandatory_escalation
+
+
+# ── Rule 5: electronics_mandatory_escalation ──────────────────────────────────
+- id: esc_electronics_mandatory_001
+  description: "Quality issue with known electronics category → mandatory escalation"
+  category: escalation
+  subcategory: electronics_mandatory
+  tags: [escalation, electronics]
+  turns:
+    - turn: 1
+      description: "Quality issue with electronics category in context"
+      input:
+        message: "quality issue"
+        message_type: text
+        context:
+          category: electronics
+      expect:
+        nlu_intent: quality_issue
+        escalate: true
+        escalate_reason_contains: electronics_mandatory_escalation
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+- id: esc_electronics_mandatory_002
+  description: "Missing item with electronics category → mandatory escalation"
+  category: escalation
+  subcategory: electronics_mandatory
+  tags: [escalation, electronics]
+  turns:
+    - turn: 1
+      description: "Missing item + electronics context"
+      input:
+        message: "missing item"
+        message_type: text
+        context:
+          category: electronics
+      expect:
+        nlu_intent: missing_item
+        escalate: true
+        escalate_reason_contains: electronics_mandatory_escalation
+
+
+# ── Rule 6: negative_sentiment (negative_turns >= 2) ─────────────────────────
+- id: esc_negative_sentiment_001
+  description: "Two strongly negative turns → sentiment escalation on turn 2"
+  category: escalation
+  subcategory: negative_sentiment
+  tags: [escalation, llm]
+  turns:
+    - turn: 1
+      description: "First negative message — no escalation yet"
+      input:
+        message: "This is absolutely terrible service! I am extremely angry and frustrated!"
+        message_type: text
+      expect:
+        escalate: false
+
+    - turn: 2
+      description: "Second negative message — negative_turns reaches 2 → escalate"
+      input:
+        message: "This is completely unacceptable! I am furious! Worst service ever!"
+        message_type: text
+      expect:
+        escalate: true
+        escalate_reason_contains: customer_frustrated
+        render_type: handover
+
+  final_assertions:
+    escalate: true

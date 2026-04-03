@@ -36,6 +36,16 @@ def process_turn(
     Default — show main menu.
     """
 
+    # Case 0: text typed at a text_input step — follow the * wildcard directly,
+    # bypassing NLU routing (the step expects free-form text, not a recognised intent).
+    if current_step and current_step in FLOWS and not option_selected:
+        step_render = FLOWS[current_step]["render"]
+        if step_render.get("render_type") == "text_input":
+            next_id = FLOWS[current_step].get("transitions", {}).get("*")
+            if next_id and next_id in FLOWS:
+                logger.info(f"text_input passthrough: {current_step} --> {next_id}")
+                return FlowResult(dict(FLOWS[next_id]["render"]), next_id, next_id, False, None)
+
     # Case 1: navigating within the flat graph (option/upload selected at a known step)
     if current_step and current_step in FLOWS and option_selected:
         step_data = FLOWS[current_step]
@@ -50,14 +60,25 @@ def process_turn(
             logger.info(f"Step transition: {current_step} --[{option_selected}]--> {next_id}")
             return FlowResult(dict(FLOWS[next_id]["render"]), next_id, next_id, False, None)
 
-        # No valid transition found — return to main
-        logger.warning(f"No transition for '{option_selected}' in step '{current_step}', returning to main")
-        return FlowResult(dict(FLOWS["main"]["render"]), "main", "main", False, None)
+        # No valid transition — re-render current step with a nudge if it has options,
+        # otherwise fall back to the friendly fallback menu.
+        logger.warning(f"No transition for '{option_selected}' in step '{current_step}'")
+        step_render = step_data["render"]
+        if step_render.get("render_type") == "options" and step_render.get("options"):
+            nudge = dict(step_render)
+            nudge["message"] = "Please select one of the available options. " + step_render.get("message", "")
+            return FlowResult(nudge, current_step, current_step, False, None)
+        return FlowResult(dict(FLOWS["flow_fallback"]["render"]), "flow_fallback", "flow_fallback", False, None)
 
     # Case 2: NLU-intent routing (text message or fresh session)
     if intent and intent != RetailIntent.UNKNOWN:
         if intent == RetailIntent.REQUEST_AGENT:
             return FlowResult({}, None, None, True, "customer_requested")
+
+        # Greetings always land on the main welcome menu
+        if intent == RetailIntent.GREETING:
+            logger.info("Greeting detected → main menu")
+            return FlowResult(dict(FLOWS["main"]["render"]), "main", "main", False, None)
 
         intent_steps = INTENT_TO_STEP.get(intent, {})
         cat = category if category else RetailCategory.UNKNOWN
@@ -70,5 +91,18 @@ def process_turn(
             logger.info(f"Intent routing: {intent.value}/{cat.value} --> {step_id}")
             return FlowResult(dict(FLOWS[step_id]["render"]), step_id, step_id, False, None)
 
-    # Default: show main menu
-    return FlowResult(dict(FLOWS["main"]["render"]), "main", "main", False, None)
+    # Default: UNKNOWN intent or no recognisable input.
+    # If the user is mid-flow at an options step, re-render that step with a gentle
+    # nudge so they stay in context instead of being dumped at the main menu.
+    if current_step and current_step in FLOWS:
+        step_render = FLOWS[current_step]["render"]
+        if step_render.get("render_type") == "options" and step_render.get("options"):
+            nudge = dict(step_render)
+            nudge["message"] = (
+                "I'm sorry, I didn't quite understand that. 😊 "
+                + step_render.get("message", "")
+            )
+            return FlowResult(nudge, current_step, current_step, False, None)
+
+    # Fresh session or at a non-options step — show friendly fallback with full menu.
+    return FlowResult(dict(FLOWS["flow_fallback"]["render"]), "flow_fallback", "flow_fallback", False, None)

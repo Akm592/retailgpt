@@ -26,6 +26,7 @@ class RetailIntent(str, Enum):
     DELIVERY_INSTR   = "delivery_instructions"
     REQUEST_AGENT    = "request_agent"
     QUANTITY_ISSUE   = "quantity_issue"
+    GREETING         = "greeting"
     UNKNOWN          = "unknown"
 
 
@@ -103,6 +104,18 @@ KEYWORD_MAP: Dict[str, RetailIntent] = {
     "kam mila":             RetailIntent.QUANTITY_ISSUE,
     "thoda kam":            RetailIntent.QUANTITY_ISSUE,
     "portion issue":        RetailIntent.QUANTITY_ISSUE,
+    # Greetings — multi-word / unambiguous forms only.
+    # Bare "hi"/"hey" are substrings of common words ("this", "they") and are
+    # intentionally left to the LLM, which uses the greeting intent rule above.
+    "hello":           RetailIntent.GREETING,
+    "hi there":        RetailIntent.GREETING,
+    "hey there":       RetailIntent.GREETING,
+    "good morning":    RetailIntent.GREETING,
+    "good afternoon":  RetailIntent.GREETING,
+    "good evening":    RetailIntent.GREETING,
+    "namaste":         RetailIntent.GREETING,
+    "namaskar":        RetailIntent.GREETING,
+    "hii":             RetailIntent.GREETING,
 }
 
 
