@@ -1172,10 +1172,10 @@ FLOWS: Dict[str, Dict[str, Any]] = {
     "flow_ticket_confirmed": {
         "render": {
             "render_type": "options",
-            "message": "Your ticket has been raised successfully. ✅ An auto-email confirmation will be sent to you shortly. Would you like to be connected to a live agent for immediate assistance?",
+            "message": "Would you like to connect with our support agent?",
             "options": [
-                {"id": "agent", "label": "Yes, connect me to a live agent"},
-                {"id": "done",  "label": "No, I'm good 👍"},
+                {"id": "agent", "label": "Yes"},
+                {"id": "done",  "label": "No"},
             ],
         },
         "transitions": {
