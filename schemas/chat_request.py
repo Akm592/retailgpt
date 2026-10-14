@@ -19,6 +19,7 @@ class ChatContext(BaseModel):
     negative_turns: int = 0
     fallback_count: int = 0
     open_handovers: List[OpenHandover] = Field(default_factory=list)
+    group: Optional[str] = None
 
 
 class TranscriptMessage(BaseModel):

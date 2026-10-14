@@ -9,6 +9,42 @@ from typing import Dict, Any
 
 FLOWS: Dict[str, Dict[str, Any]] = {
 
+    # ── Fallback: shown when the bot doesn't understand the input ────────────
+    "flow_fallback": {
+        "render": {
+            "render_type": "options",
+            "message": (
+                "I'm sorry, I didn't quite understand that. 😊 "
+                "No worries — here's what I can help you with today. "
+                "Please choose an option:"
+            ),
+            "options": [
+                {"id": "order_status",          "label": "📦 What happened to my order?"},
+                {"id": "cancel",                "label": "❌ I want to cancel my order"},
+                {"id": "delayed",               "label": "⏱️ My order is delayed"},
+                {"id": "items_issue",           "label": "🛍️ Issue with items delivered"},
+                {"id": "quality_issue",         "label": "🔍 I have a quality issue"},
+                {"id": "quantity_issue",        "label": "⚖️ Quantity issue with my food"},
+                {"id": "delivery_instructions", "label": "🛵 Instructions to delivery partner"},
+                {"id": "modify",                "label": "✏️ I want to modify items in my order"},
+                {"id": "coupon",                "label": "🎟️ Coupon related query"},
+                {"id": "payment",               "label": "💳 Payment & billing query"},
+            ],
+        },
+        "transitions": {
+            "order_status":          "flow_order_status",
+            "cancel":                "flow_cancel_detect",
+            "delayed":               "flow_delayed",
+            "items_issue":           "flow_items_detect",
+            "quality_issue":         "flow_quality_detect",
+            "quantity_issue":        "flow_quantity",
+            "delivery_instructions": "flow_delivery_instructions",
+            "modify":                "flow_modify",
+            "coupon":                "flow_coupon",
+            "payment":               "flow_payment",
+        },
+    },
+
     # ── FLOW 0: Main Menu ────────────────────────────────────────────────────
     "main": {
         "render": {
@@ -1136,10 +1172,10 @@ FLOWS: Dict[str, Dict[str, Any]] = {
     "flow_ticket_confirmed": {
         "render": {
             "render_type": "options",
-            "message": "Your ticket has been raised successfully. ✅ An auto-email confirmation will be sent to you shortly. Would you like to be connected to a live agent for immediate assistance?",
+            "message": "Would you like to connect with our support agent?",
             "options": [
-                {"id": "agent", "label": "Yes, connect me to a live agent"},
-                {"id": "done",  "label": "No, I'm good 👍"},
+                {"id": "agent", "label": "Yes"},
+                {"id": "done",  "label": "No"},
             ],
         },
         "transitions": {
@@ -1182,6 +1218,23 @@ FLOWS: Dict[str, Dict[str, Any]] = {
             "restart": "main",
         },
     },
+}
+
+
+# ---------------------------------------------------------------------------
+# Group labels for main-menu option IDs.
+# ---------------------------------------------------------------------------
+MAIN_MENU_OPTION_GROUPS: dict[str, str] = {
+    "order_status":          "general",
+    "cancel":                "operations",
+    "delayed":               "operations",
+    "items_issue":           "operations",
+    "quality_issue":         "operations",
+    "quantity_issue":        "operations",
+    "delivery_instructions": "operations",
+    "modify":                "operations",
+    "coupon":                "billing",
+    "payment":               "billing",
 }
 
 

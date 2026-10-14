@@ -1,0 +1,196 @@
+# Multi-turn delivery instructions flow tests
+
+- id: flow_delivery_no_bell
+  description: "Delivery instruction — avoid bell — noted and close"
+  category: flow
+  subcategory: delivery
+  tags: [flow, delivery]
+  turns:
+    - turn: 1
+      description: "Text: delivery instructions"
+      input:
+        message: "I want to give instructions to the delivery partner"
+        message_type: text
+      expect:
+        nlu_intent: delivery_instructions
+        render_type: options
+        next_context.flow_step: flow_delivery_instructions
+        options_count_min: 5
+
+    - turn: 2
+      description: "Select: avoid bell"
+      input:
+        message: "no_bell"
+        message_type: option_select
+        option_id: no_bell
+      expect:
+        next_context.flow_step: flow_di_simple
+        render_type: options
+        message_contains: instruction has been noted
+
+    - turn: 3
+      description: "No more instructions — done"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_delivery_leave_at_door
+  description: "Delivery instruction — leave at door"
+  category: flow
+  subcategory: delivery
+  tags: [flow, delivery]
+  turns:
+    - turn: 1
+      description: "Text: leave at door"
+      input:
+        message: "Please leave items at the door"
+        message_type: text
+      expect:
+        nlu_intent: delivery_instructions
+
+    - turn: 2
+      description: "Select: leave at door"
+      input:
+        message: "door"
+        message_type: option_select
+        option_id: door
+      expect:
+        next_context.flow_step: flow_di_simple
+        message_contains: instruction has been noted
+
+
+- id: flow_delivery_directions_text
+  description: "Delivery instruction — give directions via text input"
+  category: flow
+  subcategory: delivery
+  tags: [flow, delivery]
+  turns:
+    - turn: 1
+      description: "Text: delivery instructions"
+      input:
+        message: "I want to give directions to reach me"
+        message_type: text
+      expect:
+        nlu_intent: delivery_instructions
+
+    - turn: 2
+      description: "Select: directions"
+      input:
+        message: "directions"
+        message_type: option_select
+        option_id: directions
+      expect:
+        next_context.flow_step: flow_di_directions
+        render_type: text_input
+
+    - turn: 3
+      description: "Type directions — text_input step now handles message_type=text natively"
+      input:
+        message: "Take the second left after the main gate, building C, flat 302"
+        message_type: text
+      expect:
+        next_context.flow_step: flow_di_simple
+        message_contains: instruction has been noted
+
+    - turn: 4
+      description: "Done"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+
+- id: flow_delivery_neighbour
+  description: "Delivery instruction — leave at neighbour's place"
+  category: flow
+  subcategory: delivery
+  tags: [flow, delivery]
+  turns:
+    - turn: 1
+      description: "Text: delivery instructions"
+      input:
+        message: "I want to give instructions to delivery person"
+        message_type: text
+      expect:
+        nlu_intent: delivery_instructions
+
+    - turn: 2
+      description: "Select: neighbour"
+      input:
+        message: "neighbour"
+        message_type: option_select
+        option_id: neighbour
+      expect:
+        next_context.flow_step: flow_di_neighbour
+        render_type: text_input
+        message_contains: neighbour
+
+    - turn: 3
+      description: "Type neighbour details — text_input step handles message_type=text natively"
+      input:
+        message: "Ramesh Kumar, 9876543210, Flat 101"
+        message_type: text
+      expect:
+        next_context.flow_step: flow_di_simple
+        message_contains: instruction has been noted
+
+
+- id: flow_delivery_loop_more_instructions
+  description: "Delivery instruction — loop: add two instructions then done"
+  category: flow
+  subcategory: delivery
+  tags: [flow, delivery]
+  turns:
+    - turn: 1
+      description: "Text: delivery instructions"
+      input:
+        message: "delivery instructions"
+        message_type: text
+      expect:
+        nlu_intent: delivery_instructions
+
+    - turn: 2
+      description: "Avoid bell"
+      input:
+        message: "no_bell"
+        message_type: option_select
+        option_id: no_bell
+      expect:
+        next_context.flow_step: flow_di_simple
+
+    - turn: 3
+      description: "Add more instructions"
+      input:
+        message: "more_instr"
+        message_type: option_select
+        option_id: more_instr
+      expect:
+        next_context.flow_step: flow_delivery_instructions
+        options_count_min: 5
+
+    - turn: 4
+      description: "Avoid calling"
+      input:
+        message: "no_call"
+        message_type: option_select
+        option_id: no_call
+      expect:
+        next_context.flow_step: flow_di_simple
+
+    - turn: 5
+      description: "Done — no more instructions"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end

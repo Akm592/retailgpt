@@ -1,0 +1,2632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RetailGPT Eval Report — 20260402_015227</title>
+<style>
+  body { background:#0f0f0f; color:#e5e5e5; font-family:system-ui,sans-serif; margin:0; padding:24px; }
+  h1,h2 { color:#f5f5f5; }
+  table { border-collapse:collapse; width:100%; max-width:600px; }
+  th,td { padding:8px 12px; text-align:left; border-bottom:1px solid #333; }
+  th { color:#888; font-weight:normal; font-size:0.85em; }
+  code { background:#1e1e1e; padding:2px 5px; border-radius:3px; font-size:0.9em; }
+  details > summary { list-style:none; }
+  details > summary::-webkit-details-marker { display:none; }
+</style>
+</head>
+<body>
+<h1>RetailGPT Evaluation Report</h1>
+<p style="color:#888">Generated: 2026-04-02 01:52:27</p>
+
+<h2>Score Summary</h2>
+<table>
+  <tr><th>Category</th><th>Accuracy</th><th>Tests</th></tr>
+  <tr><td>NLU Accuracy</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>41/41</td></tr><tr><td>&nbsp;&nbsp;└─ keyword tests</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>25/25</td></tr><tr><td>&nbsp;&nbsp;└─ llm tests</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>14/14</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[fallback]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>6/6</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[agent]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>4/4</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[track_order]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>6/6</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[cancel]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>4/4</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[delayed]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>2/2</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[quality]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>6/6</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[missing]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>3/3</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[payment]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>3/3</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[quantity]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>3/3</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[coupon]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>2/2</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[delivery]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>1/1</td></tr><tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[modify]</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>1/1</td></tr><tr><td>Button Routing Accuracy</td><td style="color:#888">—</td><td style="color:#888">—</td></tr><tr><td>Flow Completion Rate</td><td style="color:#888">—</td><td style="color:#888">—</td></tr><tr><td>Escalation Accuracy</td><td style="color:#888">—</td><td style="color:#888">—</td></tr><tr><td>Overall</td><td style="color:#22c55e;font-weight:bold">100.0%</td><td>41/41</td></tr>
+  <tr><td>NLU Avg Confidence</td><td style="color:#60a5fa;font-weight:bold">0.866</td><td>—</td></tr>
+</table>
+
+<h2 style="margin-top:32px">Test Results</h2>
+
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">fallback_fresh_session_001</code>
+            <span style="color:#888">Completely unrelated text at fresh session → friendly fallback with full menu</span>
+            <span style="color:#888;font-size:0.8em;float:right">2702ms · nlu/fallback</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Completely unrelated text at fresh session → friendly fallback with full menu [PASS] (2702ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='unknown'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=False</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_fallback'</div><div style="color:#22c55e">✓ <code>message_contains</code>: expected="didn't quite understand"</div><div style="color:#22c55e">✓ <code>options_count_min</code>: expected='>=10'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "what is the capital of France",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry, I didn't quite understand that. \ud83d\ude0a No worries \u2014 here's what I can help you with today. Please choose an option:",
+  "options": [
+    {
+      "id": "order_status",
+      "label": "\ud83d\udce6 What happened to my order?"
+    },
+    {
+      "id": "cancel",
+      "label": "\u274c I want to cancel my order"
+    },
+    {
+      "id": "delayed",
+      "label": "\u23f1\ufe0f My order is delayed"
+    },
+    {
+      "id": "items_issue",
+      "label": "\ud83d\udecd\ufe0f Issue with items delivered"
+    },
+    {
+      "id": "quality_issue",
+      "label": "\ud83d\udd0d I have a quality issue"
+    },
+    {
+      "id": "quantity_issue",
+      "label": "\u2696\ufe0f Quantity issue with my food"
+    },
+    {
+      "id": "delivery_instructions",
+      "label": "\ud83d\udef5 Instructions to delivery partner"
+    },
+    {
+      "id": "modify",
+      "label": "\u270f\ufe0f I want to modify items in my order"
+    },
+    {
+      "id": "coupon",
+      "label": "\ud83c\udf9f\ufe0f Coupon related query"
+    },
+    {
+      "id": "payment",
+      "label": "\ud83d\udcb3 Payment & billing query"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_fallback",
+    "flow_step": "flow_fallback",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 1,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "unknown",
+    "category": "unknown",
+    "confidence": 0.3,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "fallback"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">fallback_fresh_session_002</code>
+            <span style="color:#888">Gibberish at fresh session → friendly fallback</span>
+            <span style="color:#888;font-size:0.8em;float:right">2244ms · nlu/fallback</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Gibberish at fresh session → friendly fallback [PASS] (2244ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='unknown'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=False</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_fallback'</div><div style="color:#22c55e">✓ <code>message_contains</code>: expected="didn't quite understand"</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "xkzqwerty blorpzorp zzz",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry, I didn't quite understand that. \ud83d\ude0a No worries \u2014 here's what I can help you with today. Please choose an option:",
+  "options": [
+    {
+      "id": "order_status",
+      "label": "\ud83d\udce6 What happened to my order?"
+    },
+    {
+      "id": "cancel",
+      "label": "\u274c I want to cancel my order"
+    },
+    {
+      "id": "delayed",
+      "label": "\u23f1\ufe0f My order is delayed"
+    },
+    {
+      "id": "items_issue",
+      "label": "\ud83d\udecd\ufe0f Issue with items delivered"
+    },
+    {
+      "id": "quality_issue",
+      "label": "\ud83d\udd0d I have a quality issue"
+    },
+    {
+      "id": "quantity_issue",
+      "label": "\u2696\ufe0f Quantity issue with my food"
+    },
+    {
+      "id": "delivery_instructions",
+      "label": "\ud83d\udef5 Instructions to delivery partner"
+    },
+    {
+      "id": "modify",
+      "label": "\u270f\ufe0f I want to modify items in my order"
+    },
+    {
+      "id": "coupon",
+      "label": "\ud83c\udf9f\ufe0f Coupon related query"
+    },
+    {
+      "id": "payment",
+      "label": "\ud83d\udcb3 Payment & billing query"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_fallback",
+    "flow_step": "flow_fallback",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 1,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "unknown",
+    "category": "unknown",
+    "confidence": 0.1,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">fallback_midflow_001</code>
+            <span style="color:#888">Unrelated text mid-flow → re-renders current step with nudge message</span>
+            <span style="color:#888;font-size:0.8em;float:right">2133ms · nlu/fallback</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Unrelated text mid-flow → re-renders current step with nudge message [PASS] (2133ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='unknown'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=False</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_cancel_detect'</div><div style="color:#22c55e">✓ <code>message_contains</code>: expected="didn't quite understand"</div><div style="color:#22c55e">✓ <code>options_include_id</code>: expected=['fb', 'fashion', 'electronics']</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "tell me a joke",
+  "message_type": "text",
+  "context": {
+    "flow_step": "flow_cancel_detect",
+    "turn_count": 2
+  }
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry, I didn't quite understand that. \ud83d\ude0a I can help with your cancellation. What type of order is it?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_cancel_detect",
+    "flow_step": "flow_cancel_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 3,
+    "negative_turns": 0,
+    "fallback_count": 1,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "unknown",
+    "category": "unknown",
+    "confidence": 0.5,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">fallback_midflow_002</code>
+            <span style="color:#888">Gibberish mid-flow quality step → re-renders current step options</span>
+            <span style="color:#888;font-size:0.8em;float:right">1889ms · nlu/fallback</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Gibberish mid-flow quality step → re-renders current step options [PASS] (1889ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='unknown'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=False</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_quality_fb'</div><div style="color:#22c55e">✓ <code>message_contains</code>: expected="didn't quite understand"</div><div style="color:#22c55e">✓ <code>options_include_id</code>: expected=['stale', 'burnt', 'taste', 'spillage']</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "asdfghjkl qwerty zxcvbnm",
+  "message_type": "text",
+  "context": {
+    "flow_step": "flow_quality_fb",
+    "turn_count": 3
+  }
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry, I didn't quite understand that. \ud83d\ude0a Please select the specific quality issue:",
+  "options": [
+    {
+      "id": "stale",
+      "label": "Item(s) was stale"
+    },
+    {
+      "id": "burnt",
+      "label": "Item was burnt / overcooked"
+    },
+    {
+      "id": "taste",
+      "label": "Poor taste"
+    },
+    {
+      "id": "spillage",
+      "label": "Package / spillage issue"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quality_fb",
+    "flow_step": "flow_quality_fb",
+    "category": null,
+    "order_id": null,
+    "turn_count": 4,
+    "negative_turns": 0,
+    "fallback_count": 1,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "unknown",
+    "category": "unknown",
+    "confidence": 0.4,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">fallback_text_input_001</code>
+            <span style="color:#888">Typing text at flow_di_directions → follows * transition without NLU</span>
+            <span style="color:#888;font-size:0.8em;float:right">2516ms · nlu/fallback</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Typing text at flow_di_directions → follows * transition without NLU [PASS] (2516ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>escalate</code>: expected=False</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_di_simple'</div><div style="color:#22c55e">✓ <code>message_contains</code>: expected='instruction has been noted'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "Second gate on the left, blue building, flat 4B",
+  "message_type": "text",
+  "context": {
+    "flow_step": "flow_di_directions",
+    "turn_count": 3
+  }
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Your instruction has been noted and passed to the delivery partner with a timestamp. \u2705",
+  "options": [
+    {
+      "id": "more_instr",
+      "label": "Yes, more instructions"
+    },
+    {
+      "id": "done",
+      "label": "No, I'm good \ud83d\udc4d"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_di_simple",
+    "flow_step": "flow_di_simple",
+    "category": null,
+    "order_id": null,
+    "turn_count": 4,
+    "negative_turns": 0,
+    "fallback_count": 1,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "unknown",
+    "category": "unknown",
+    "confidence": 0.3,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "fallback"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">fallback_text_input_002</code>
+            <span style="color:#888">Typing neighbour details at flow_di_neighbour → follows * transition</span>
+            <span style="color:#888;font-size:0.8em;float:right">2050ms · nlu/fallback</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Typing neighbour details at flow_di_neighbour → follows * transition [PASS] (2050ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>escalate</code>: expected=False</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_di_simple'</div><div style="color:#22c55e">✓ <code>message_contains</code>: expected='instruction has been noted'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "Priya Sharma, 9988776655, House 12B",
+  "message_type": "text",
+  "context": {
+    "flow_step": "flow_di_neighbour",
+    "turn_count": 3
+  }
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Your instruction has been noted and passed to the delivery partner with a timestamp. \u2705",
+  "options": [
+    {
+      "id": "more_instr",
+      "label": "Yes, more instructions"
+    },
+    {
+      "id": "done",
+      "label": "No, I'm good \ud83d\udc4d"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_di_simple",
+    "flow_step": "flow_di_simple",
+    "category": null,
+    "order_id": null,
+    "turn_count": 4,
+    "negative_turns": 0,
+    "fallback_count": 1,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "unknown",
+    "category": "unknown",
+    "confidence": 0.3,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "fallback"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_agent_001</code>
+            <span style="color:#888">Talk to agent (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2253ms · nlu/agent</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Talk to agent (keyword) [PASS] (2253ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='request_agent'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.9'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=True</div><div style="color:#22c55e">✓ <code>escalate_reason_contains</code>: expected='customer_requested'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "talk to agent",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "customer_requested",
+  "ai_summary": "The customer has requested to speak with an agent. Please connect",
+  "next_context": null,
+  "nlu": {
+    "intent": "request_agent",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_agent_002</code>
+            <span style="color:#888">Hinglish agent request - koi insaan (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2067ms · nlu/agent</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Hinglish agent request - koi insaan (keyword) [PASS] (2067ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='request_agent'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=True</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "koi insaan chahiye mujhe",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "customer_requested",
+  "ai_summary": "The customer requested to speak with an agent.",
+  "next_context": null,
+  "nlu": {
+    "intent": "request_agent",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_agent_003</code>
+            <span style="color:#888">Human please (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2327ms · nlu/agent</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Human please (keyword) [PASS] (2327ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='request_agent'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=True</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "human please",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "customer_requested",
+  "ai_summary": "The customer requested to speak with an agent.",
+  "next_context": null,
+  "nlu": {
+    "intent": "request_agent",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_agent_004</code>
+            <span style="color:#888">Speak to someone (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2151ms · nlu/agent</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Speak to someone (keyword) [PASS] (2151ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='request_agent'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=True</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "speak to someone",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "customer_requested",
+  "ai_summary": "The customer has requested to speak with an agent, but no",
+  "next_context": null,
+  "nlu": {
+    "intent": "request_agent",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_track_001</code>
+            <span style="color:#888">Where is my order (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/track_order</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Where is my order (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='track_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.9'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_order_status'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "where is my order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Sure, let me check your order status. Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_order_status",
+    "flow_step": "flow_order_status",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "track_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_track_002</code>
+            <span style="color:#888">Order status (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/track_order</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Order status (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='track_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "order status",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Sure, let me check your order status. Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_order_status",
+    "flow_step": "flow_order_status",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "track_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_track_003</code>
+            <span style="color:#888">Track my order (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/track_order</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Track my order (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='track_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "track my order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Sure, let me check your order status. Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_order_status",
+    "flow_step": "flow_order_status",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "track_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_track_004</code>
+            <span style="color:#888">Hinglish order status - mera order kahan (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/track_order</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Hinglish order status - mera order kahan (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='track_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "mera order kahan hai",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Sure, let me check your order status. Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_order_status",
+    "flow_step": "flow_order_status",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "track_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_track_005</code>
+            <span style="color:#888">Hinglish kab aayega (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/track_order</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Hinglish kab aayega (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='track_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "kab aayega mera order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Sure, let me check your order status. Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_order_status",
+    "flow_step": "flow_order_status",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "track_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_track_006</code>
+            <span style="color:#888">What happened to my order (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">1901ms · nlu/track_order</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: What happened to my order (LLM) [PASS] (1901ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='track_order'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "What happened to my order?",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Sure, let me check your order status. Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_order_status",
+    "flow_step": "flow_order_status",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "track_order",
+    "category": "unknown",
+    "confidence": 0.9,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_cancel_001</code>
+            <span style="color:#888">Cancel my order (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/cancel</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Cancel my order (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='cancel_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.9'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_cancel_detect'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "cancel my order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I can help with your cancellation. What type of order is it?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_cancel_detect",
+    "flow_step": "flow_cancel_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "cancel_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_cancel_002</code>
+            <span style="color:#888">Cancel karna hai (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/cancel</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Cancel karna hai (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='cancel_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "cancel karna hai mujhe",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I can help with your cancellation. What type of order is it?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_cancel_detect",
+    "flow_step": "flow_cancel_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "cancel_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_cancel_003</code>
+            <span style="color:#888">Order band karo (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/cancel</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Order band karo (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='cancel_order'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "order band karo",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I can help with your cancellation. What type of order is it?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_cancel_detect",
+    "flow_step": "flow_cancel_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "cancel_order",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_cancel_004</code>
+            <span style="color:#888">I want to cancel (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">1381ms · nlu/cancel</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: I want to cancel (LLM) [PASS] (1381ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='cancel_order'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "I want to cancel my food order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Checking your cancellation window... Was your order placed within the last 30 seconds?",
+  "options": [
+    {
+      "id": "yes",
+      "label": "Yes, I just placed it"
+    },
+    {
+      "id": "no",
+      "label": "No, it was placed earlier"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_cancel_fb",
+    "flow_step": "flow_cancel_fb",
+    "category": "fb",
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "cancel_order",
+    "category": "fb",
+    "confidence": 0.95,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_delayed_001</code>
+            <span style="color:#888">My order is delayed (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">1536ms · nlu/delayed</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: My order is delayed (LLM) [PASS] (1536ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='delayed_order'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_delayed'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "My order is delayed",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Let me check your delivery status...",
+  "options": [
+    {
+      "id": "ontime",
+      "label": "Order is still showing on time"
+    },
+    {
+      "id": "late",
+      "label": "Order is genuinely late"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_delayed",
+    "flow_step": "flow_delayed",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 1,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "delayed_order",
+    "category": "unknown",
+    "confidence": 0.9,
+    "sentiment": "negative",
+    "order_id": null,
+    "entities": [
+      "delayed"
+    ],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_delayed_002</code>
+            <span style="color:#888">Order late ho gaya (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2265ms · nlu/delayed</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Order late ho gaya (LLM) [PASS] (2265ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='delayed_order'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.6'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "order late ho gaya",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Let me check your delivery status...",
+  "options": [
+    {
+      "id": "ontime",
+      "label": "Order is still showing on time"
+    },
+    {
+      "id": "late",
+      "label": "Order is genuinely late"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_delayed",
+    "flow_step": "flow_delayed",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 1,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "delayed_order",
+    "category": "unknown",
+    "confidence": 0.9,
+    "sentiment": "negative",
+    "order_id": null,
+    "entities": [
+      "late"
+    ],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_quality_001</code>
+            <span style="color:#888">Quality issue (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/quality</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Quality issue (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quality_issue'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.9'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_quality_detect'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "quality issue with my order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry to hear about the quality issue! Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quality_detect",
+    "flow_step": "flow_quality_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quality_issue",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_quality_002</code>
+            <span style="color:#888">Food was cold (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/quality</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Food was cold (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quality_issue'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "food was cold",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry to hear about the quality issue! Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quality_detect",
+    "flow_step": "flow_quality_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quality_issue",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_quality_003</code>
+            <span style="color:#888">Khana thanda tha (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/quality</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Khana thanda tha (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quality_issue'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "khana thanda tha",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry to hear about the quality issue! Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quality_detect",
+    "flow_step": "flow_quality_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quality_issue",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_quality_004</code>
+            <span style="color:#888">Khana kharab (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/quality</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Khana kharab (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quality_issue'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "khana kharab tha bilkul",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry to hear about the quality issue! Which category is your order?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quality_detect",
+    "flow_step": "flow_quality_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quality_issue",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_quality_005</code>
+            <span style="color:#888">My food was stale (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">1929ms · nlu/quality</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: My food was stale (LLM) [PASS] (1929ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quality_issue'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "My food was stale and tasted terrible",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Please select the specific quality issue:",
+  "options": [
+    {
+      "id": "stale",
+      "label": "Item(s) was stale"
+    },
+    {
+      "id": "burnt",
+      "label": "Item was burnt / overcooked"
+    },
+    {
+      "id": "taste",
+      "label": "Poor taste"
+    },
+    {
+      "id": "spillage",
+      "label": "Package / spillage issue"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quality_fb",
+    "flow_step": "flow_quality_fb",
+    "category": "fb",
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 1,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quality_issue",
+    "category": "fb",
+    "confidence": 0.95,
+    "sentiment": "negative",
+    "order_id": null,
+    "entities": [
+      "stale",
+      "terrible taste"
+    ],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_quality_006</code>
+            <span style="color:#888">Electronics quality triggers mandatory escalation (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4708ms · nlu/quality</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Electronics quality triggers mandatory escalation (LLM) [PASS] (4708ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quality_issue'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.6'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "my laptop screen is cracked",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "electronics_mandatory_escalation",
+  "ai_summary": "The customer is reporting a quality issue with an electronics",
+  "next_context": null,
+  "nlu": {
+    "intent": "quality_issue",
+    "category": "electronics",
+    "confidence": 0.95,
+    "sentiment": "negative",
+    "order_id": null,
+    "entities": [
+      "laptop screen",
+      "cracked"
+    ],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_missing_001</code>
+            <span style="color:#888">Missing item (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/missing</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Missing item (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='missing_item'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.9'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_items_detect'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "missing item in my order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry to hear that! What type of order was it?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_items_detect",
+    "flow_step": "flow_items_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "missing_item",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_missing_002</code>
+            <span style="color:#888">Item nahi mila (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">6ms · nlu/missing</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Item nahi mila (keyword) [PASS] (6ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='missing_item'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "item nahi mila mujhe",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry to hear that! What type of order was it?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_items_detect",
+    "flow_step": "flow_items_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "missing_item",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_missing_003</code>
+            <span style="color:#888">Nahi aaya (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">9ms · nlu/missing</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Nahi aaya (keyword) [PASS] (9ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='missing_item'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "mera item nahi aaya",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I'm sorry to hear that! What type of order was it?",
+  "options": [
+    {
+      "id": "fb",
+      "label": "\ud83c\udf55 Food & Beverages (F&B)"
+    },
+    {
+      "id": "fashion",
+      "label": "\ud83d\udc57 Fashion & Apparel"
+    },
+    {
+      "id": "electronics",
+      "label": "\ud83d\udcbb Electronics"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_items_detect",
+    "flow_step": "flow_items_detect",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "missing_item",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_payment_001</code>
+            <span style="color:#888">Refund status (keyword) — triggers mandatory escalation</span>
+            <span style="color:#888;font-size:0.8em;float:right">2434ms · nlu/payment</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Refund status (keyword) — triggers mandatory escalation [PASS] (2434ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='payment_query'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=True</div><div style="color:#22c55e">✓ <code>escalate_reason_contains</code>: expected='payment_query_mandatory_escalation'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "refund status",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "payment_query_mandatory_escalation",
+  "ai_summary": "The customer has a payment query. Please investigate",
+  "next_context": null,
+  "nlu": {
+    "intent": "payment_query",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_payment_002</code>
+            <span style="color:#888">Paisa wapas (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2901ms · nlu/payment</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Paisa wapas (keyword) [PASS] (2901ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='payment_query'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=True</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "paisa wapas chahiye",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "payment_query_mandatory_escalation",
+  "ai_summary": "The customer has initiated a payment query.",
+  "next_context": null,
+  "nlu": {
+    "intent": "payment_query",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_payment_003</code>
+            <span style="color:#888">Amount deducted (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2560ms · nlu/payment</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Amount deducted (keyword) [PASS] (2560ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='payment_query'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>escalate</code>: expected=True</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "amount deducted from my account",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "handover",
+  "message": "Let me connect you to a support agent who can help you with this.",
+  "options": null,
+  "upload_config": null,
+  "terminal": false,
+  "escalate": true,
+  "escalate_reason": "payment_query_mandatory_escalation",
+  "ai_summary": "The customer has a payment query.",
+  "next_context": null,
+  "nlu": {
+    "intent": "payment_query",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_qty_001</code>
+            <span style="color:#888">Quantity issue (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/quantity</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Quantity issue (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quantity_issue'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.9'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_quantity'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "quantity issue with my food",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Please select the items with the quantity issue from your order. Now select the specific issue:",
+  "options": [
+    {
+      "id": "less_vs_others",
+      "label": "Quantity less vs other restaurants"
+    },
+    {
+      "id": "expected_more",
+      "label": "Expected more for the price paid"
+    },
+    {
+      "id": "more_received",
+      "label": "Quantity was more than expected"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quantity",
+    "flow_step": "flow_quantity",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quantity_issue",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_qty_002</code>
+            <span style="color:#888">Kam mila (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">4ms · nlu/quantity</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Kam mila (keyword) [PASS] (4ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quantity_issue'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "khana bahut kam mila",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Please select the items with the quantity issue from your order. Now select the specific issue:",
+  "options": [
+    {
+      "id": "less_vs_others",
+      "label": "Quantity less vs other restaurants"
+    },
+    {
+      "id": "expected_more",
+      "label": "Expected more for the price paid"
+    },
+    {
+      "id": "more_received",
+      "label": "Quantity was more than expected"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quantity",
+    "flow_step": "flow_quantity",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quantity_issue",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_qty_003</code>
+            <span style="color:#888">Portion issue (keyword)</span>
+            <span style="color:#888;font-size:0.8em;float:right">5ms · nlu/quantity</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Portion issue (keyword) [PASS] (5ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='quantity_issue'</div><div style="color:#22c55e">✓ <code>nlu_source</code>: expected='keyword'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "portion issue with the food",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Please select the items with the quantity issue from your order. Now select the specific issue:",
+  "options": [
+    {
+      "id": "less_vs_others",
+      "label": "Quantity less vs other restaurants"
+    },
+    {
+      "id": "expected_more",
+      "label": "Expected more for the price paid"
+    },
+    {
+      "id": "more_received",
+      "label": "Quantity was more than expected"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_quantity",
+    "flow_step": "flow_quantity",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "quantity_issue",
+    "category": "unknown",
+    "confidence": 0.97,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "keyword"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_coupon_001</code>
+            <span style="color:#888">I have a coupon issue (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">1526ms · nlu/coupon</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: I have a coupon issue (LLM) [PASS] (1526ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='coupon_query'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_coupon'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "I have a coupon issue",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I can help with your coupon query! What is the issue?",
+  "options": [
+    {
+      "id": "find",
+      "label": "I'm unable to find my coupon"
+    },
+    {
+      "id": "apply",
+      "label": "I'm unable to apply my coupon"
+    },
+    {
+      "id": "forgot",
+      "label": "I forgot to apply my coupon"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_coupon",
+    "flow_step": "flow_coupon",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "coupon_query",
+    "category": "unknown",
+    "confidence": 0.95,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [
+      "coupon"
+    ],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_coupon_002</code>
+            <span style="color:#888">I forgot to apply coupon (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">1879ms · nlu/coupon</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: I forgot to apply coupon (LLM) [PASS] (1879ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='coupon_query'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "I forgot to apply my coupon",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "I can help with your coupon query! What is the issue?",
+  "options": [
+    {
+      "id": "find",
+      "label": "I'm unable to find my coupon"
+    },
+    {
+      "id": "apply",
+      "label": "I'm unable to apply my coupon"
+    },
+    {
+      "id": "forgot",
+      "label": "I forgot to apply my coupon"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_coupon",
+    "flow_step": "flow_coupon",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "coupon_query",
+    "category": "unknown",
+    "confidence": 0.95,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [
+      "coupon"
+    ],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_delivery_001</code>
+            <span style="color:#888">Delivery instructions (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">2075ms · nlu/delivery</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: Delivery instructions (LLM) [PASS] (2075ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='delivery_instructions'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_delivery_instructions'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "I want to give instructions to the delivery person",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "Sure! What instruction would you like to give the delivery partner? (Available until they reach your location)",
+  "options": [
+    {
+      "id": "no_bell",
+      "label": "Avoid ringing the bell \ud83d\udd15"
+    },
+    {
+      "id": "door",
+      "label": "Leave items at the door \ud83d\udeaa"
+    },
+    {
+      "id": "no_call",
+      "label": "Avoid calling me \ud83d\udcf5"
+    },
+    {
+      "id": "directions",
+      "label": "Give directions to reach me \ud83d\udccd"
+    },
+    {
+      "id": "neighbour",
+      "label": "Leave at neighbour's place \ud83c\udfe0"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_delivery_instructions",
+    "flow_step": "flow_delivery_instructions",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "delivery_instructions",
+    "category": "unknown",
+    "confidence": 0.95,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+        <details style="border:1px solid #333;border-radius:6px;margin:6px 0;padding:8px">
+          <summary style="cursor:pointer">
+            <span style="color:#22c55e;font-weight:bold">[PASS]</span>
+            <code style="margin:0 8px">nlu_modify_001</code>
+            <span style="color:#888">I want to modify my order (LLM)</span>
+            <span style="color:#888;font-size:0.8em;float:right">1848ms · nlu/modify</span>
+          </summary>
+          <div style="margin-top:8px">
+        <details style="margin:4px 0;border-left:3px solid #22c55e;padding-left:8px">
+          <summary style="cursor:pointer;color:#22c55e">Turn 1: I want to modify my order (LLM) [PASS] (1848ms)</summary>
+          <div style="margin-top:8px"><div style="color:#22c55e">✓ <code>nlu_intent</code>: expected='modify_order'</div><div style="color:#22c55e">✓ <code>nlu_confidence_min</code>: expected='>=0.7'</div><div style="color:#22c55e">✓ <code>render_type</code>: expected='options'</div><div style="color:#22c55e">✓ <code>next_context.flow_step</code>: expected='flow_modify'</div></div>
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;color:#888;font-size:0.85em">Request / Response JSON</summary>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "message": "I want to modify my order",
+  "message_type": "text"
+}</pre>
+            <pre style="background:#1e1e1e;color:#d4d4d4;padding:8px;border-radius:4px;font-size:0.75em;overflow-x:auto">{
+  "render_type": "options",
+  "message": "We regret to inform you that you will not be able to make changes to confirmed express delivery orders.",
+  "options": [
+    {
+      "id": "menu",
+      "label": "Yes, back to menu"
+    },
+    {
+      "id": "done",
+      "label": "No, I'm good \ud83d\udc4d"
+    }
+  ],
+  "upload_config": null,
+  "terminal": false,
+  "escalate": false,
+  "escalate_reason": null,
+  "ai_summary": null,
+  "next_context": {
+    "current_flow": "flow_modify",
+    "flow_step": "flow_modify",
+    "category": null,
+    "order_id": null,
+    "turn_count": 1,
+    "negative_turns": 0,
+    "fallback_count": 0,
+    "open_handovers": [],
+    "group": null
+  },
+  "nlu": {
+    "intent": "modify_order",
+    "category": "unknown",
+    "confidence": 0.95,
+    "sentiment": "neutral",
+    "order_id": null,
+    "entities": [],
+    "source": "llm"
+  },
+  "ticket_raised": false,
+  "issue_type": null,
+  "group": null
+}</pre>
+          </details>
+        </details></div>
+        </details>
+</body>
+</html>

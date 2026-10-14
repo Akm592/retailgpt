@@ -1,0 +1,469 @@
+# NLU single-turn text input tests
+# Tags: [keyword] = deterministic keyword path, [llm] = Gemini LLM path
+# Run with --exclude-tags llm for fast/cheap runs
+
+# ── REQUEST AGENT ────────────────────────────────────────────────────────────
+- id: nlu_agent_001
+  description: "Talk to agent (keyword)"
+  category: nlu
+  subcategory: agent
+  input:
+    message: "talk to agent"
+    message_type: text
+  expect:
+    nlu_intent: request_agent
+    nlu_source: keyword
+    nlu_confidence_min: 0.90
+    escalate: true
+    escalate_reason_contains: customer_requested
+  tags: [keyword, english, agent]
+
+- id: nlu_agent_002
+  description: "Hinglish agent request - koi insaan (keyword)"
+  category: nlu
+  subcategory: agent
+  input:
+    message: "koi insaan chahiye mujhe"
+    message_type: text
+  expect:
+    nlu_intent: request_agent
+    nlu_source: keyword
+    escalate: true
+  tags: [keyword, hinglish, agent]
+
+- id: nlu_agent_003
+  description: "Human please (keyword)"
+  category: nlu
+  subcategory: agent
+  input:
+    message: "human please"
+    message_type: text
+  expect:
+    nlu_intent: request_agent
+    nlu_source: keyword
+    escalate: true
+  tags: [keyword, english, agent]
+
+- id: nlu_agent_004
+  description: "Speak to someone (keyword)"
+  category: nlu
+  subcategory: agent
+  input:
+    message: "speak to someone"
+    message_type: text
+  expect:
+    nlu_intent: request_agent
+    nlu_source: keyword
+    escalate: true
+  tags: [keyword, english, agent]
+
+# ── TRACK ORDER ──────────────────────────────────────────────────────────────
+- id: nlu_track_001
+  description: "Where is my order (keyword)"
+  category: nlu
+  subcategory: track_order
+  input:
+    message: "where is my order"
+    message_type: text
+  expect:
+    nlu_intent: track_order
+    nlu_source: keyword
+    nlu_confidence_min: 0.90
+    render_type: options
+    next_context.flow_step: flow_order_status
+  tags: [keyword, english, track_order]
+
+- id: nlu_track_002
+  description: "Order status (keyword)"
+  category: nlu
+  subcategory: track_order
+  input:
+    message: "order status"
+    message_type: text
+  expect:
+    nlu_intent: track_order
+    nlu_source: keyword
+    render_type: options
+  tags: [keyword, english, track_order]
+
+- id: nlu_track_003
+  description: "Track my order (keyword)"
+  category: nlu
+  subcategory: track_order
+  input:
+    message: "track my order"
+    message_type: text
+  expect:
+    nlu_intent: track_order
+    nlu_source: keyword
+  tags: [keyword, english, track_order]
+
+- id: nlu_track_004
+  description: "Hinglish order status - mera order kahan (keyword)"
+  category: nlu
+  subcategory: track_order
+  input:
+    message: "mera order kahan hai"
+    message_type: text
+  expect:
+    nlu_intent: track_order
+    nlu_source: keyword
+  tags: [keyword, hinglish, track_order]
+
+- id: nlu_track_005
+  description: "Hinglish kab aayega (keyword)"
+  category: nlu
+  subcategory: track_order
+  input:
+    message: "kab aayega mera order"
+    message_type: text
+  expect:
+    nlu_intent: track_order
+    nlu_source: keyword
+  tags: [keyword, hinglish, track_order]
+
+- id: nlu_track_006
+  description: "What happened to my order (LLM)"
+  category: nlu
+  subcategory: track_order
+  input:
+    message: "What happened to my order?"
+    message_type: text
+  expect:
+    nlu_intent: track_order
+    nlu_confidence_min: 0.70
+    render_type: options
+  tags: [llm, english, track_order]
+
+# ── CANCEL ORDER ─────────────────────────────────────────────────────────────
+- id: nlu_cancel_001
+  description: "Cancel my order (keyword)"
+  category: nlu
+  subcategory: cancel
+  input:
+    message: "cancel my order"
+    message_type: text
+  expect:
+    nlu_intent: cancel_order
+    nlu_source: keyword
+    nlu_confidence_min: 0.90
+    render_type: options
+    next_context.flow_step: flow_cancel_detect
+  tags: [keyword, english, cancel]
+
+- id: nlu_cancel_002
+  description: "Cancel karna hai (keyword)"
+  category: nlu
+  subcategory: cancel
+  input:
+    message: "cancel karna hai mujhe"
+    message_type: text
+  expect:
+    nlu_intent: cancel_order
+    nlu_source: keyword
+  tags: [keyword, hinglish, cancel]
+
+- id: nlu_cancel_003
+  description: "Order band karo (keyword)"
+  category: nlu
+  subcategory: cancel
+  input:
+    message: "order band karo"
+    message_type: text
+  expect:
+    nlu_intent: cancel_order
+    nlu_source: keyword
+  tags: [keyword, hinglish, cancel]
+
+- id: nlu_cancel_004
+  description: "I want to cancel (LLM)"
+  category: nlu
+  subcategory: cancel
+  input:
+    message: "I want to cancel my food order"
+    message_type: text
+  expect:
+    nlu_intent: cancel_order
+    nlu_confidence_min: 0.70
+  tags: [llm, english, cancel]
+
+# ── DELAYED ORDER ─────────────────────────────────────────────────────────────
+- id: nlu_delayed_001
+  description: "My order is delayed (LLM)"
+  category: nlu
+  subcategory: delayed
+  input:
+    message: "My order is delayed"
+    message_type: text
+  expect:
+    nlu_intent: delayed_order
+    nlu_confidence_min: 0.70
+    render_type: options
+    next_context.flow_step: flow_delayed
+  tags: [llm, english, delayed]
+
+- id: nlu_delayed_002
+  description: "Order late ho gaya (LLM)"
+  category: nlu
+  subcategory: delayed
+  input:
+    message: "order late ho gaya"
+    message_type: text
+  expect:
+    nlu_intent: delayed_order
+    nlu_confidence_min: 0.60
+  tags: [llm, hinglish, delayed]
+
+# ── QUALITY ISSUE ─────────────────────────────────────────────────────────────
+- id: nlu_quality_001
+  description: "Quality issue (keyword)"
+  category: nlu
+  subcategory: quality
+  input:
+    message: "quality issue with my order"
+    message_type: text
+  expect:
+    nlu_intent: quality_issue
+    nlu_source: keyword
+    nlu_confidence_min: 0.90
+    render_type: options
+    next_context.flow_step: flow_quality_detect
+  tags: [keyword, english, quality]
+
+- id: nlu_quality_002
+  description: "Food was cold (keyword)"
+  category: nlu
+  subcategory: quality
+  input:
+    message: "food was cold"
+    message_type: text
+  expect:
+    nlu_intent: quality_issue
+    nlu_source: keyword
+  tags: [keyword, english, quality]
+
+- id: nlu_quality_003
+  description: "Khana thanda tha (keyword)"
+  category: nlu
+  subcategory: quality
+  input:
+    message: "khana thanda tha"
+    message_type: text
+  expect:
+    nlu_intent: quality_issue
+    nlu_source: keyword
+  tags: [keyword, hinglish, quality]
+
+- id: nlu_quality_004
+  description: "Khana kharab (keyword)"
+  category: nlu
+  subcategory: quality
+  input:
+    message: "khana kharab tha bilkul"
+    message_type: text
+  expect:
+    nlu_intent: quality_issue
+    nlu_source: keyword
+  tags: [keyword, hinglish, quality]
+
+- id: nlu_quality_005
+  description: "My food was stale (LLM)"
+  category: nlu
+  subcategory: quality
+  input:
+    message: "My food was stale and tasted terrible"
+    message_type: text
+  expect:
+    nlu_intent: quality_issue
+    nlu_confidence_min: 0.70
+  tags: [llm, english, quality]
+
+- id: nlu_quality_006
+  description: "Electronics quality triggers mandatory escalation (LLM)"
+  category: nlu
+  subcategory: quality
+  input:
+    message: "my laptop screen is cracked"
+    message_type: text
+  expect:
+    nlu_intent: quality_issue
+    nlu_confidence_min: 0.60
+  tags: [llm, english, quality, electronics]
+
+# ── MISSING ITEM ──────────────────────────────────────────────────────────────
+- id: nlu_missing_001
+  description: "Missing item (keyword)"
+  category: nlu
+  subcategory: missing
+  input:
+    message: "missing item in my order"
+    message_type: text
+  expect:
+    nlu_intent: missing_item
+    nlu_source: keyword
+    nlu_confidence_min: 0.90
+    render_type: options
+    next_context.flow_step: flow_items_detect
+  tags: [keyword, english, missing]
+
+- id: nlu_missing_002
+  description: "Item nahi mila (keyword)"
+  category: nlu
+  subcategory: missing
+  input:
+    message: "item nahi mila mujhe"
+    message_type: text
+  expect:
+    nlu_intent: missing_item
+    nlu_source: keyword
+  tags: [keyword, hinglish, missing]
+
+- id: nlu_missing_003
+  description: "Nahi aaya (keyword)"
+  category: nlu
+  subcategory: missing
+  input:
+    message: "mera item nahi aaya"
+    message_type: text
+  expect:
+    nlu_intent: missing_item
+    nlu_source: keyword
+  tags: [keyword, hinglish, missing]
+
+# ── PAYMENT QUERY ─────────────────────────────────────────────────────────────
+- id: nlu_payment_001
+  description: "Refund status (keyword) — triggers mandatory escalation"
+  category: nlu
+  subcategory: payment
+  input:
+    message: "refund status"
+    message_type: text
+  expect:
+    nlu_intent: payment_query
+    nlu_source: keyword
+    escalate: true
+    escalate_reason_contains: payment_query_mandatory_escalation
+  tags: [keyword, english, payment]
+
+- id: nlu_payment_002
+  description: "Paisa wapas (keyword)"
+  category: nlu
+  subcategory: payment
+  input:
+    message: "paisa wapas chahiye"
+    message_type: text
+  expect:
+    nlu_intent: payment_query
+    nlu_source: keyword
+    escalate: true
+  tags: [keyword, hinglish, payment]
+
+- id: nlu_payment_003
+  description: "Amount deducted (keyword)"
+  category: nlu
+  subcategory: payment
+  input:
+    message: "amount deducted from my account"
+    message_type: text
+  expect:
+    nlu_intent: payment_query
+    nlu_source: keyword
+    escalate: true
+  tags: [keyword, english, payment]
+
+# ── QUANTITY ISSUE ────────────────────────────────────────────────────────────
+- id: nlu_qty_001
+  description: "Quantity issue (keyword)"
+  category: nlu
+  subcategory: quantity
+  input:
+    message: "quantity issue with my food"
+    message_type: text
+  expect:
+    nlu_intent: quantity_issue
+    nlu_source: keyword
+    nlu_confidence_min: 0.90
+    render_type: options
+    next_context.flow_step: flow_quantity
+  tags: [keyword, english, quantity]
+
+- id: nlu_qty_002
+  description: "Kam mila (keyword)"
+  category: nlu
+  subcategory: quantity
+  input:
+    message: "khana bahut kam mila"
+    message_type: text
+  expect:
+    nlu_intent: quantity_issue
+    nlu_source: keyword
+  tags: [keyword, hinglish, quantity]
+
+- id: nlu_qty_003
+  description: "Portion issue (keyword)"
+  category: nlu
+  subcategory: quantity
+  input:
+    message: "portion issue with the food"
+    message_type: text
+  expect:
+    nlu_intent: quantity_issue
+    nlu_source: keyword
+  tags: [keyword, english, quantity]
+
+# ── COUPON QUERY ──────────────────────────────────────────────────────────────
+- id: nlu_coupon_001
+  description: "I have a coupon issue (LLM)"
+  category: nlu
+  subcategory: coupon
+  input:
+    message: "I have a coupon issue"
+    message_type: text
+  expect:
+    nlu_intent: coupon_query
+    nlu_confidence_min: 0.70
+    render_type: options
+    next_context.flow_step: flow_coupon
+  tags: [llm, english, coupon]
+
+- id: nlu_coupon_002
+  description: "I forgot to apply coupon (LLM)"
+  category: nlu
+  subcategory: coupon
+  input:
+    message: "I forgot to apply my coupon"
+    message_type: text
+  expect:
+    nlu_intent: coupon_query
+    nlu_confidence_min: 0.70
+  tags: [llm, english, coupon]
+
+# ── DELIVERY INSTRUCTIONS ─────────────────────────────────────────────────────
+- id: nlu_delivery_001
+  description: "Delivery instructions (LLM)"
+  category: nlu
+  subcategory: delivery
+  input:
+    message: "I want to give instructions to the delivery person"
+    message_type: text
+  expect:
+    nlu_intent: delivery_instructions
+    nlu_confidence_min: 0.70
+    render_type: options
+    next_context.flow_step: flow_delivery_instructions
+  tags: [llm, english, delivery]
+
+# ── MODIFY ORDER ──────────────────────────────────────────────────────────────
+- id: nlu_modify_001
+  description: "I want to modify my order (LLM)"
+  category: nlu
+  subcategory: modify
+  input:
+    message: "I want to modify my order"
+    message_type: text
+  expect:
+    nlu_intent: modify_order
+    nlu_confidence_min: 0.70
+    render_type: options
+    next_context.flow_step: flow_modify
+  tags: [llm, english, modify]
