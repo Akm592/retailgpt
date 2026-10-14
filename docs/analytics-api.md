@@ -389,7 +389,7 @@ Use for deep performance reviews — monthly 1:1s, performance improvement plans
     "expired": 3,
     "pending": 2,
     "accepted": 1,
-    "resolution_rate": 0.9318
+    "resolution_rate": 0.8723
   },
   "survey_stats": {
     "total_responses": 28,
@@ -536,7 +536,7 @@ GET /analytics/team-performance?support_group=billing&start_date=2026-03-01&end_
       "agent_id": "agent_uuid_123",
       "agent_name": "Sarah M.",
       "overall_score": 8.1,
-      "resolution_stats": { "total": 47, "resolved": 41, "expired": 3, "pending": 2, "accepted": 1, "resolution_rate": 0.9318 },
+      "resolution_stats": { "total": 47, "resolved": 41, "expired": 3, "pending": 2, "accepted": 1, "resolution_rate": 0.8723 },
       "survey_stats": { "total_responses": 28, "avg_overall_satisfaction": 4.2, "avg_nps": 7.8, "response_time_distribution": {...}, "helpfulness_distribution": {...} },
       "timing_stats": { "avg_resolution_hours": 1.4, "min_resolution_hours": 0.1, "max_resolution_hours": 8.2 }
     }
@@ -629,7 +629,7 @@ GET /analytics/org-performance?start_date=2026-03-01&end_date=2026-03-31
       "support_group": "billing",
       "agent_count": 5,
       "avg_score": 7.4,
-      "resolution_stats": { "total": 203, "resolved": 178, "expired": 14, "pending": 8, "accepted": 3, "resolution_rate": 0.9271 },
+      "resolution_stats": { "total": 203, "resolved": 178, "expired": 14, "pending": 8, "accepted": 3, "resolution_rate": 0.8768 },
       "survey_stats": { "total_responses": 112, "avg_overall_satisfaction": 4.1, "avg_nps": 7.2, "response_time_distribution": {...}, "helpfulness_distribution": {...} }
     },
     {

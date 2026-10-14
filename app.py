@@ -318,6 +318,19 @@ async def chat_summary_endpoint(request: SummaryRequest):
 # Analytics routes
 # ---------------------------------------------------------------------------
 
+def _validate_date_range(start_date: Optional[str], end_date: Optional[str]) -> None:
+    """Reject anything that isn't a real YYYY-MM-DD date, and start after end."""
+    parsed = {}
+    for name, value in (("start_date", start_date), ("end_date", end_date)):
+        if value is None:
+            continue
+        try:
+            parsed[name] = datetime.strptime(value, "%Y-%m-%d").date()
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"{name} must be a valid date in YYYY-MM-DD format, got '{value}'")
+    if len(parsed) == 2 and parsed["start_date"] > parsed["end_date"]:
+        raise HTTPException(status_code=400, detail="start_date must be on or before end_date")
+
 @app.post("/analytics/evaluate-human-handover", response_model=EvaluateHumanHandoverResponse, tags=["Analytics"])
 async def evaluate_human_handover_endpoint(request: EvaluateHumanHandoverRequest):
     """Score a single human agent's handover interaction on 7 rubrics using AI."""
@@ -336,6 +349,7 @@ async def evaluate_human_handover_endpoint(request: EvaluateHumanHandoverRequest
 @app.post("/analytics/evaluate-human-agent", response_model=EvaluateHumanAgentResponse, tags=["Analytics"])
 async def evaluate_human_agent_endpoint(request: EvaluateHumanAgentRequest):
     """Evaluate a human agent's overall performance across all handovers with AI narrative and rubric scores."""
+    _validate_date_range(request.start_date, request.end_date)
     try:
         result = await agent_performance(
             request.agent_id,
@@ -361,6 +375,7 @@ async def agent_self_endpoint(
     sample_limit: int = Query(5, ge=1, le=10, description="Transcript samples sent to AI"),
 ):
     """Agent self-view: own performance score, rubric breakdown, and AI coaching."""
+    _validate_date_range(start_date, end_date)
     try:
         result = await agent_performance(agent_id, start_date, end_date, sample_limit)
         return EvaluateHumanAgentResponse(**result)
@@ -380,6 +395,7 @@ async def team_performance_endpoint(
     end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
 ):
     """Manager view: leaderboard + aggregate stats for all agents in a support group."""
+    _validate_date_range(start_date, end_date)
     try:
         result = await team_performance_analytics(support_group, start_date, end_date)
         return TeamPerformanceResponse(**result)
@@ -398,6 +414,7 @@ async def org_performance_endpoint(
     end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
 ):
     """Admin view: cross-group performance comparison with org-wide aggregates."""
+    _validate_date_range(start_date, end_date)
     try:
         result = await org_performance_analytics(start_date, end_date)
         return OrgPerformanceResponse(**result)
@@ -415,6 +432,7 @@ async def funnel_endpoint(
     support_group: Optional[str] = Query(None, description="Narrow to sessions that escalated into this group"),
 ):
     """Session funnel: AI resolved vs escalated vs abandoned with escalation reason breakdown."""
+    _validate_date_range(start_date, end_date)
     try:
         result = await funnel_analytics(start_date, end_date, support_group)
         return FunnelResponse(**result)
@@ -431,6 +449,7 @@ async def ai_performance_endpoint(
     end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
 ):
     """AI agent metrics: containment rate, avg rating, bot failure rate, escalation reason distribution."""
+    _validate_date_range(start_date, end_date)
     try:
         result = await ai_performance_analytics(start_date, end_date)
         return AIPerformanceResponse(**result)

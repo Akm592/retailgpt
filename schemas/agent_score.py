@@ -70,7 +70,7 @@ class ResolutionStats(BaseModel):
     expired: int
     pending: int
     accepted: int
-    resolution_rate: float = Field(..., description="resolved / (resolved + expired); 0.0 if no completed handovers")
+    resolution_rate: float = Field(..., description="resolved / total handovers; 0.0 if no handovers")
 
 
 class SurveyStats(BaseModel):

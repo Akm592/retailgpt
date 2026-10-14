@@ -7,7 +7,8 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Optional
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 from supabase import AsyncClient, acreate_client
 
@@ -107,27 +108,22 @@ class AgentScorer:
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY not set")
-        genai.configure(api_key=api_key)
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = "gemini-3.5-flash-lite"
 
-        self.score_model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash-lite",
+        self.score_config = types.GenerateContentConfig(
             system_instruction=_load_prompt("agent_score_system.txt"),
-            generation_config={
-                "temperature": 0.2,
-                "top_p": 0.95,
-                "max_output_tokens": 1500,
-                "response_mime_type": "application/json",
-            },
+            temperature=0.2,
+            top_p=0.95,
+            max_output_tokens=1500,
+            response_mime_type="application/json",
         )
-        self.perf_model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash-lite",
+        self.perf_config = types.GenerateContentConfig(
             system_instruction=_load_prompt("agent_performance_system.txt"),
-            generation_config={
-                "temperature": 0.2,
-                "top_p": 0.95,
-                "max_output_tokens": 2000,
-                "response_mime_type": "application/json",
-            },
+            temperature=0.2,
+            top_p=0.95,
+            max_output_tokens=2000,
+            response_mime_type="application/json",
         )
 
         self._db: Optional[AsyncClient] = None
@@ -171,7 +167,9 @@ class AgentScorer:
         prompt = self._build_score_prompt(handover, messages, survey, ticket)
 
         try:
-            response = await self.score_model.generate_content_async(prompt)
+            response = await self.client.aio.models.generate_content(
+                model=self.model_name, contents=prompt, config=self.score_config
+            )
             parsed = json.loads(response.text.strip())
         except Exception as e:
             logger.error(f"Gemini scoring error: {e}")
@@ -318,7 +316,9 @@ class AgentScorer:
         )
 
         try:
-            response = await self.perf_model.generate_content_async(prompt)
+            response = await self.client.aio.models.generate_content(
+                model=self.model_name, contents=prompt, config=self.perf_config
+            )
             parsed = json.loads(response.text.strip())
         except Exception as e:
             logger.error(f"Gemini performance error: {e}")
@@ -354,10 +354,10 @@ class AgentScorer:
             status = h.get("status", "")
             if status in counts:
                 counts[status] += 1
-        denom = counts["resolved"] + counts["expired"]
-        resolution_rate = round(counts["resolved"] / denom, 4) if denom > 0 else 0.0
+        total = len(handovers)
+        resolution_rate = round(counts["resolved"] / total, 4) if total > 0 else 0.0
         return {
-            "total":           len(handovers),
+            "total":           total,
             "resolved":        counts["resolved"],
             "expired":         counts["expired"],
             "pending":         counts["pending"],

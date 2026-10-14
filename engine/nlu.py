@@ -6,7 +6,8 @@ from typing import Optional, List, Dict
 from dataclasses import dataclass, field
 from enum import Enum
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -125,7 +126,7 @@ class NLUClassifier:
         if not api_key:
             raise ValueError("GEMINI_API_KEY not set in environment")
 
-        genai.configure(api_key=api_key)
+        self.client = genai.Client(api_key=api_key)
 
         prompt_path = os.path.join(os.path.dirname(__file__), "..", "prompts", "nlu_system.txt")
         try:
@@ -134,15 +135,13 @@ class NLUClassifier:
         except FileNotFoundError:
             raise RuntimeError(f"NLU system prompt not found at: {prompt_path}")
 
-        self.model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+        self.model_name = "gemini-3.5-flash-lite"
+        self.config = types.GenerateContentConfig(
             system_instruction=system_prompt,
-            generation_config={
-                "temperature": 0.1,
-                "top_p": 0.95,
-                "max_output_tokens": 256,
-                "response_mime_type": "application/json",
-            }
+            temperature=0.1,
+            top_p=0.95,
+            max_output_tokens=256,
+            response_mime_type="application/json",
         )
         logger.info("NLUClassifier initialised")
 
@@ -157,7 +156,9 @@ class NLUClassifier:
             prompt = f"Customer message: {clean}"
             if known_category and known_category != "unknown":
                 prompt += f"\nContext: product category already identified as '{known_category}'"
-            response = await self.model.generate_content_async(prompt)
+            response = await self.client.aio.models.generate_content(
+                model=self.model_name, contents=prompt, config=self.config
+            )
             return self._parse(response.text, known_category)
         except Exception as e:
             logger.error(f"NLU Gemini error: {e}")

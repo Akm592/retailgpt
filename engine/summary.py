@@ -3,7 +3,8 @@ import os
 import logging
 from typing import List, Optional
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,7 +17,7 @@ class SummaryGenerator:
         if not api_key:
             raise ValueError("GEMINI_API_KEY not set")
 
-        genai.configure(api_key=api_key)
+        self.client = genai.Client(api_key=api_key)
 
         prompt_path = os.path.join(os.path.dirname(__file__), "..", "prompts", "summary_system.txt")
         try:
@@ -25,14 +26,12 @@ class SummaryGenerator:
         except FileNotFoundError:
             raise RuntimeError(f"Summary prompt not found at: {prompt_path}")
 
-        self.model = genai.GenerativeModel(
-            model_name="gemini-2.5-flash",
+        self.model_name = "gemini-3.5-flash-lite"
+        self.config = types.GenerateContentConfig(
             system_instruction=system_prompt,
-            generation_config={
-                "temperature": 0.2,
-                "top_p": 0.95,
-                "max_output_tokens": 300,
-            }
+            temperature=0.2,
+            top_p=0.95,
+            max_output_tokens=300,
         )
         logger.info("SummaryGenerator initialised")
 
@@ -59,8 +58,10 @@ class SummaryGenerator:
             context_str = "\n".join(context_lines)
             prompt = f"{context_str}\n\nConversation:\n{formatted}" if context_str else f"Conversation:\n{formatted}"
 
-            response = await self.model.generate_content_async(prompt)
-            summary = response.text.strip()
+            response = await self.client.aio.models.generate_content(
+                model=self.model_name, contents=prompt, config=self.config
+            )
+            summary = (response.text or "").strip()
             return summary if summary else "Customer contacted support. Details in conversation transcript."
         except Exception as e:
             logger.error(f"Summary generation error: {e}")
