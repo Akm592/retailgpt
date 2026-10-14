@@ -1,0 +1,237 @@
+# Multi-turn coupon and payment/billing flow tests
+
+# ── COUPON FLOWS ──────────────────────────────────────────────────────────────
+- id: flow_coupon_forgot
+  description: "Coupon — forgot to apply — reassurance message"
+  category: flow
+  subcategory: coupon
+  tags: [flow, coupon]
+  turns:
+    - turn: 1
+      description: "Text: coupon issue"
+      input:
+        message: "I forgot to apply my coupon"
+        message_type: text
+      expect:
+        nlu_intent: coupon_query
+        render_type: options
+        next_context.flow_step: flow_coupon
+        options_include_id: [find, apply, forgot]
+
+    - turn: 2
+      description: "Select: forgot"
+      input:
+        message: "forgot"
+        message_type: option_select
+        option_id: forgot
+      expect:
+        next_context.flow_step: flow_coupon_forgot
+        render_type: options
+        message_contains: coupon is still available
+
+    - turn: 3
+      description: "Done"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_coupon_find
+  description: "Coupon — can't find coupon — guidance provided"
+  category: flow
+  subcategory: coupon
+  tags: [flow, coupon]
+  turns:
+    - turn: 1
+      description: "Text: coupon issue"
+      input:
+        message: "I have a coupon issue"
+        message_type: text
+      expect:
+        nlu_intent: coupon_query
+
+    - turn: 2
+      description: "Select: find"
+      input:
+        message: "find"
+        message_type: option_select
+        option_id: find
+      expect:
+        next_context.flow_step: flow_coupon_find
+        message_contains: APPLY COUPON
+
+    - turn: 3
+      description: "Done"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+
+- id: flow_coupon_apply
+  description: "Coupon — can't apply — T&C guidance"
+  category: flow
+  subcategory: coupon
+  tags: [flow, coupon]
+  turns:
+    - turn: 1
+      description: "Text: coupon issue"
+      input:
+        message: "I have a coupon issue"
+        message_type: text
+      expect:
+        nlu_intent: coupon_query
+
+    - turn: 2
+      description: "Select: apply"
+      input:
+        message: "apply"
+        message_type: option_select
+        option_id: apply
+      expect:
+        next_context.flow_step: flow_coupon_apply
+        message_contains: terms and conditions
+
+
+# ── PAYMENT FLOWS ─────────────────────────────────────────────────────────────
+- id: flow_payment_mandatory_escalation_text
+  description: "Payment query via text — immediate mandatory escalation"
+  category: flow
+  subcategory: payment
+  tags: [flow, payment, escalation]
+  turns:
+    - turn: 1
+      description: "Text: payment issue (keyword)"
+      input:
+        message: "payment issue"
+        message_type: text
+      expect:
+        nlu_intent: payment_query
+        nlu_source: keyword
+        escalate: true
+        escalate_reason_contains: payment_query_mandatory_escalation
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+- id: flow_payment_refund_processing
+  description: "Payment — refund status — refund still processing"
+  category: flow
+  subcategory: payment
+  tags: [flow, payment]
+  turns:
+    - turn: 1
+      description: "Text: refund status keyword — escalates immediately"
+      input:
+        message: "refund status"
+        message_type: text
+      expect:
+        nlu_intent: payment_query
+        nlu_source: keyword
+        escalate: true
+
+  final_assertions:
+    escalate: true
+
+
+- id: flow_payment_invoice
+  description: "Payment — invoice request — via button from payment flow step"
+  category: flow
+  subcategory: payment
+  tags: [flow, payment]
+  turns:
+    - turn: 1
+      description: "Start at flow_payment (bypassing text to avoid immediate escalation)"
+      input:
+        message: "invoice"
+        message_type: option_select
+        option_id: invoice
+        context:
+          flow_step: flow_payment
+          turn_count: 2
+      expect:
+        next_context.flow_step: flow_payment_invoice
+        message_contains: invoice
+
+    - turn: 2
+      description: "Done"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+
+- id: flow_payment_failure_escalation
+  description: "Payment failure — immediate agent escalation via button"
+  category: flow
+  subcategory: payment
+  tags: [flow, payment, escalation]
+  turns:
+    - turn: 1
+      description: "Start at flow_payment"
+      input:
+        message: "failure"
+        message_type: option_select
+        option_id: failure
+        context:
+          flow_step: flow_payment
+          turn_count: 2
+      expect:
+        next_context.flow_step: flow_payment_failure
+        options_include_id: [ok]
+        message_contains: live agent
+
+    - turn: 2
+      description: "Confirm"
+      input:
+        message: "ok"
+        message_type: option_select
+        option_id: ok
+      expect:
+        escalate: true
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+- id: flow_payment_bill_escalation
+  description: "Payment — bill issue — connects to agent"
+  category: flow
+  subcategory: payment
+  tags: [flow, payment, escalation]
+  turns:
+    - turn: 1
+      description: "Select bill issue from payment menu"
+      input:
+        message: "bill"
+        message_type: option_select
+        option_id: bill
+        context:
+          flow_step: flow_payment
+          turn_count: 2
+      expect:
+        next_context.flow_step: flow_payment_bill
+        options_include_id: [ok]
+
+    - turn: 2
+      description: "Okay, wait for agent"
+      input:
+        message: "ok"
+        message_type: option_select
+        option_id: ok
+      expect:
+        escalate: true
+        render_type: handover

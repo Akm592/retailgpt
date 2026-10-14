@@ -17,15 +17,16 @@ Intent must be exactly one of:
 track_order, cancel_order, delayed_order, modify_order,
 quality_issue, missing_item, wrong_item,
 payment_query, coupon_query, delivery_instructions,
-request_agent, quantity_issue, unknown
+request_agent, quantity_issue, greeting, unknown
 
 Category must be exactly one of:
-fb, grocery, fashion, electronics, unknown
+fb, fashion, electronics, unknown
 
 Sentiment must be exactly one of:
 positive, neutral, negative
 
 Rules for intent:
+- If message is purely a greeting with no support query (hi, hello, hey, namaste, namaskar, good morning, good evening, good afternoon, hii, heyy) -> intent = greeting
 - If message contains "agent", "human", "aadmi", "banda", "real person", "support agent", "koi insaan" -> intent = request_agent
 - If message contains "where is", "kahan hai", "track", "order status", "kab aayega" -> intent = track_order
 - If message contains "cancel", "band karo", "cancel karna" -> intent = cancel_order
@@ -36,7 +37,6 @@ Rules for intent:
 
 Rules for category:
 - fb = food, restaurant, biryani, dal, pizza, burger, curry, meal, tiffin, sweets
-- grocery = vegetables, fruits, milk, eggs, packaged food, sabzi, atta, rice, oil, dahi
 - fashion = clothes, shirt, dress, shoes, size, fitting, color, kurta, jeans, fabric
 - electronics = phone, mobile, laptop, charger, earphone, gadget, device, cable, adapter
 

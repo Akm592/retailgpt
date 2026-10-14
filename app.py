@@ -1,8 +1,12 @@
 from __future__ import annotations
+import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 
@@ -10,6 +14,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("app")
 
+ORDERS_API_BASE_URL: str = os.getenv("ORDERS_API_BASE_URL", "")
 
 
 # ---------------------------------------------------------------------------
@@ -17,10 +22,25 @@ logger = logging.getLogger("app")
 # ---------------------------------------------------------------------------
 from engine.nlu import get_nlu_classifier, initialize_nlu_classifier, RetailIntent, RetailCategory
 from engine.flow_engine import process_turn
+from engine.flows import MAIN_MENU_OPTION_GROUPS
 from engine.escalation import check_escalation
 from engine.summary import generate_summary, initialize_summary_generator
+from engine.order_lookup import fetch_order_options
+from engine.agent_scorer import (
+    score_agent, agent_performance, initialize_agent_scorer, get_db,
+    team_performance_analytics, org_performance_analytics,
+    funnel_analytics, ai_performance_analytics, score_and_cache_handover,
+)
 from schemas.chat_request import ChatTurnRequest, SummaryRequest, ChatContext
 from schemas.chat_response import ChatTurnResponse, SummaryResponse, NLUOutput, OptionItem
+from schemas.agent_score import (
+    EvaluateHumanHandoverRequest, EvaluateHumanHandoverResponse,
+    EvaluateHumanAgentRequest, EvaluateHumanAgentResponse,
+    TeamPerformanceResponse, OrgPerformanceResponse,
+    FunnelResponse, AIPerformanceResponse,
+    ScoreAndCacheRequest, ScoreAndCacheResponse,
+)
+from fastapi import HTTPException
 
 
 # ---------------------------------------------------------------------------
@@ -30,6 +50,7 @@ from schemas.chat_response import ChatTurnResponse, SummaryResponse, NLUOutput, 
 async def lifespan(app: FastAPI):
     await initialize_nlu_classifier()
     await initialize_summary_generator()
+    await initialize_agent_scorer()
     logger.info("CRM engine modules ready")
     logger.info("API ready to accept requests")
     yield
@@ -37,6 +58,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="RetailGPT Customer Support API", lifespan=lifespan)
 
+
+# ---------------------------------------------------------------------------
+# Health check
+# ---------------------------------------------------------------------------
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the RetailGPT Customer Support API"}
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "ok",
+        "nlu_ready": get_nlu_classifier() is not None,
+    }
 
 # ---------------------------------------------------------------------------
 # Test UI
@@ -94,7 +129,7 @@ async def chat_turn(request: ChatTurnRequest):
         fallback_count=ctx.fallback_count,
         open_handovers=[h.dict() for h in ctx.open_handovers],
         order_id=ctx.order_id,
-        customer_id=ctx.customer_id,
+        customer_id=request.customer_id,
     )
 
     if esc.should_escalate:
@@ -104,6 +139,16 @@ async def chat_turn(request: ChatTurnRequest):
             category=ctx.category,
             order_id=ctx.order_id,
         )
+        try:
+            db = await get_db()
+            await db.table("sessions").update({
+                "outcome": "escalated",
+                "escalation_reason": esc.reason,
+                "ai_turns": ctx.turn_count,
+                "fallback_count": ctx.fallback_count,
+            }).eq("id", request.session_id).execute()
+        except Exception as _e:
+            logger.warning(f"Session escalation write failed [{request.session_id}]: {_e}")
         nlu_out = NLUOutput(**nlu_result.to_dict()) if nlu_result else None
         return ChatTurnResponse(
             render_type="handover",
@@ -111,6 +156,7 @@ async def chat_turn(request: ChatTurnRequest):
             escalate=True,
             escalate_reason=esc.reason,
             ai_summary=summary,
+            group=ctx.group,
             next_context=None,
             nlu=nlu_out
         )
@@ -130,6 +176,16 @@ async def chat_turn(request: ChatTurnRequest):
             category=ctx.category,
             order_id=ctx.order_id,
         )
+        try:
+            db = await get_db()
+            await db.table("sessions").update({
+                "outcome": "escalated",
+                "escalation_reason": flow_result.escalate_reason,
+                "ai_turns": ctx.turn_count,
+                "fallback_count": ctx.fallback_count,
+            }).eq("id", request.session_id).execute()
+        except Exception as _e:
+            logger.warning(f"Session escalation write failed [{request.session_id}]: {_e}")
         nlu_out = NLUOutput(**nlu_result.to_dict()) if nlu_result else None
         return ChatTurnResponse(
             render_type="handover",
@@ -137,17 +193,95 @@ async def chat_turn(request: ChatTurnRequest):
             escalate=True,
             escalate_reason=flow_result.escalate_reason,
             ai_summary=summary,
+            group=ctx.group,
             next_context=None,
             nlu=nlu_out
         )
+
+    # Persist AI session rating + resolve the session when the customer rates the bot
+    if flow_result.next_flow == "flow_rated" and request.option_id in {"1", "2", "3", "4", "5"}:
+        try:
+            db = await get_db()
+            await asyncio.gather(
+                db.table("ai_session_feedback").insert({
+                    "session_id": request.session_id,
+                    "customer_id": request.customer_id,
+                    "rating": int(request.option_id),
+                    "category": ctx.category,
+                    "turn_count": ctx.turn_count,
+                    "fallback_count": ctx.fallback_count,
+                }).execute(),
+                db.table("sessions").update({
+                    "outcome": "resolved_by_ai",
+                    "resolved_at": datetime.now(timezone.utc).isoformat(),
+                    "ai_turns": ctx.turn_count,
+                    "fallback_count": ctx.fallback_count,
+                }).eq("id", request.session_id).execute(),
+            )
+        except Exception as _e:
+            logger.warning(f"AI session feedback write failed [{request.session_id}]: {_e}")
+
+    # Capture order_id if the selected option came from an order-select step
+    render = flow_result.render_instruction
+    if render.get("capture_as_order_id") and request.option_id:
+        ctx.order_id = request.option_id
+
+    # Capture group when the user selects from the main menu
+    if request.option_id and request.context.flow_step == "main" and request.option_id in MAIN_MENU_OPTION_GROUPS:
+        ctx.group = MAIN_MENU_OPTION_GROUPS[request.option_id]
 
     ctx.turn_count += 1
     ctx.current_flow = flow_result.next_flow
     ctx.flow_step = flow_result.next_step
 
-    render = flow_result.render_instruction
+    # If the next step needs orders from the API, fetch them now
     options = None
-    if "options" in render:
+    if render.get("fetch_orders"):
+        order_category = render.get("order_category", ctx.category or "")
+        fetched_options, api_order_id = await fetch_order_options(
+            customer_id=request.customer_id or "",
+            category=order_category,
+            base_url=ORDERS_API_BASE_URL,
+        )
+        if fetched_options:
+            options = [OptionItem(**o) for o in fetched_options]
+            if api_order_id and not ctx.order_id:
+                ctx.order_id = api_order_id
+        else:
+            # Category not supported by orders API (e.g. Grocery), no past orders,
+            # or API unavailable — auto-follow the wildcard transition to skip the
+            # order-select step and continue the flow.
+            skip_result = process_turn(
+                intent=None,
+                category=category,
+                option_selected="*",
+                current_flow=ctx.current_flow,
+                current_step=ctx.flow_step,
+            )
+            if not skip_result.escalate and skip_result.next_step:
+                ctx.current_flow = skip_result.next_flow
+                ctx.flow_step = skip_result.next_step
+                render = dict(skip_result.render_instruction)  # shallow copy — safe to mutate
+                # Prepend a brief notice so the user knows why no order picker appeared
+                if render.get("message"):
+                    render["message"] = (
+                        "We couldn't find any recent orders for your account. "
+                        + render["message"]
+                    )
+                options = [OptionItem(**o) for o in render["options"]] if "options" in render else None
+            else:
+                # Hard fallback: return to main menu
+                logger.warning("Order-select auto-skip failed; falling back to main menu")
+                fallback = process_turn(None, RetailCategory.UNKNOWN, None, None, None)
+                ctx.current_flow = fallback.next_flow
+                ctx.flow_step = fallback.next_step
+                render = dict(fallback.render_instruction)
+                render["message"] = (
+                    "We ran into an issue looking up your orders. "
+                    + render.get("message", "")
+                )
+                options = [OptionItem(**o) for o in render["options"]] if "options" in render else None
+    elif "options" in render:
         options = [OptionItem(**o) for o in render["options"]]
 
     nlu_out = NLUOutput(**nlu_result.to_dict()) if nlu_result else None
@@ -158,6 +292,9 @@ async def chat_turn(request: ChatTurnRequest):
         options=options,
         upload_config=render.get("upload_config"),
         terminal=render.get("terminal", False),
+        ticket_raised=render.get("ticket_raised", False),
+        issue_type=render.get("issue_type"),
+        group=ctx.group,
         escalate=False,
         escalate_reason=None,
         ai_summary=None,
@@ -175,3 +312,145 @@ async def chat_summary_endpoint(request: SummaryRequest):
         order_id=request.order_id,
     )
     return SummaryResponse(summary=summary)
+
+
+# ---------------------------------------------------------------------------
+# Analytics routes
+# ---------------------------------------------------------------------------
+
+@app.post("/analytics/evaluate-human-handover", response_model=EvaluateHumanHandoverResponse, tags=["Analytics"])
+async def evaluate_human_handover_endpoint(request: EvaluateHumanHandoverRequest):
+    """Score a single human agent's handover interaction on 7 rubrics using AI."""
+    try:
+        result = await score_agent(request.handover_id)
+        return EvaluateHumanHandoverResponse(**result)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Handover not found")
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Agent scoring error: {e}")
+        raise HTTPException(status_code=500, detail="Scoring failed")
+
+
+@app.post("/analytics/evaluate-human-agent", response_model=EvaluateHumanAgentResponse, tags=["Analytics"])
+async def evaluate_human_agent_endpoint(request: EvaluateHumanAgentRequest):
+    """Evaluate a human agent's overall performance across all handovers with AI narrative and rubric scores."""
+    try:
+        result = await agent_performance(
+            request.agent_id,
+            request.start_date,
+            request.end_date,
+            request.sample_limit,
+        )
+        return EvaluateHumanAgentResponse(**result)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Agent performance error: {e}")
+        raise HTTPException(status_code=500, detail="Performance analysis failed")
+
+
+@app.get("/analytics/agent-self", response_model=EvaluateHumanAgentResponse, tags=["Analytics"])
+async def agent_self_endpoint(
+    agent_id: str = Query(..., description="Agent's own user ID"),
+    start_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
+    sample_limit: int = Query(5, ge=1, le=10, description="Transcript samples sent to AI"),
+):
+    """Agent self-view: own performance score, rubric breakdown, and AI coaching."""
+    try:
+        result = await agent_performance(agent_id, start_date, end_date, sample_limit)
+        return EvaluateHumanAgentResponse(**result)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Agent self-view error: {e}")
+        raise HTTPException(status_code=500, detail="Performance analysis failed")
+
+
+@app.get("/analytics/team-performance", response_model=TeamPerformanceResponse, tags=["Analytics"])
+async def team_performance_endpoint(
+    support_group: str = Query(..., description="Support group to report on (billing / operations / general)"),
+    start_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
+):
+    """Manager view: leaderboard + aggregate stats for all agents in a support group."""
+    try:
+        result = await team_performance_analytics(support_group, start_date, end_date)
+        return TeamPerformanceResponse(**result)
+    except LookupError:
+        raise HTTPException(status_code=404, detail=f"Support group '{support_group}' not found or has no agents")
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Team performance error: {e}")
+        raise HTTPException(status_code=500, detail="Team performance analysis failed")
+
+
+@app.get("/analytics/org-performance", response_model=OrgPerformanceResponse, tags=["Analytics"])
+async def org_performance_endpoint(
+    start_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
+):
+    """Admin view: cross-group performance comparison with org-wide aggregates."""
+    try:
+        result = await org_performance_analytics(start_date, end_date)
+        return OrgPerformanceResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Org performance error: {e}")
+        raise HTTPException(status_code=500, detail="Org performance analysis failed")
+
+
+@app.get("/analytics/funnel", response_model=FunnelResponse, tags=["Analytics"])
+async def funnel_endpoint(
+    start_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
+    support_group: Optional[str] = Query(None, description="Narrow to sessions that escalated into this group"),
+):
+    """Session funnel: AI resolved vs escalated vs abandoned with escalation reason breakdown."""
+    try:
+        result = await funnel_analytics(start_date, end_date, support_group)
+        return FunnelResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Funnel analytics error: {e}")
+        raise HTTPException(status_code=500, detail="Funnel analysis failed")
+
+
+@app.get("/analytics/ai-performance", response_model=AIPerformanceResponse, tags=["Analytics"])
+async def ai_performance_endpoint(
+    start_date: Optional[str] = Query(None, description="Filter from date (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="Filter until date (YYYY-MM-DD)"),
+):
+    """AI agent metrics: containment rate, avg rating, bot failure rate, escalation reason distribution."""
+    try:
+        result = await ai_performance_analytics(start_date, end_date)
+        return AIPerformanceResponse(**result)
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"AI performance error: {e}")
+        raise HTTPException(status_code=500, detail="AI performance analysis failed")
+
+
+@app.post("/analytics/score-and-cache", response_model=ScoreAndCacheResponse, tags=["Analytics"])
+async def score_and_cache_endpoint(request: ScoreAndCacheRequest):
+    """Score a resolved handover with AI rubrics and persist the result to the agent_scores cache table."""
+    try:
+        result = await score_and_cache_handover(request.handover_id)
+        return ScoreAndCacheResponse(**result)
+    except LookupError:
+        raise HTTPException(status_code=404, detail="Handover not found")
+    except ValueError as e:
+        raise HTTPException(status_code=503, detail=f"Configuration error: {e}")
+    except Exception as e:
+        logger.error(f"Score and cache error: {e}")
+        raise HTTPException(status_code=500, detail="Scoring failed")

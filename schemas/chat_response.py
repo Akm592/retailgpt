@@ -37,6 +37,9 @@ class ChatTurnResponse(BaseModel):
     ai_summary: Optional[str] = None
     next_context: Optional[ChatContext] = None
     nlu: Optional[NLUOutput] = None
+    ticket_raised: bool = False
+    issue_type: Optional[str] = None
+    group: Optional[str] = None
 
 
 class SummaryResponse(BaseModel):

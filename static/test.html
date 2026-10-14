@@ -46,6 +46,29 @@
   }
   .btn-new:hover { background: #c73652; }
 
+  .customer-id-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .customer-id-wrap label {
+    font-size: 11px;
+    color: #8888aa;
+    white-space: nowrap;
+  }
+  .customer-id-wrap input {
+    background: #2a2a4a;
+    border: 1px solid #444466;
+    color: #e0e0ff;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-family: monospace;
+    width: 90px;
+    outline: none;
+  }
+  .customer-id-wrap input:focus { border-color: #7b7bcc; }
+
   /* ── Layout ── */
   .layout {
     display: flex;
@@ -354,6 +377,19 @@
     line-height: 1.5;
   }
 
+  /* ── Info notice (no-options fallback) ── */
+  .info-notice {
+    align-self: center;
+    background: #f0f4ff;
+    border: 1px solid #c7d7f7;
+    color: #4b6cb7;
+    font-size: 12px;
+    border-radius: 8px;
+    padding: 7px 14px;
+    text-align: center;
+    max-width: 72%;
+  }
+
   /* ── Empty state ── */
   .empty-state {
     flex: 1;
@@ -373,6 +409,10 @@
 
 <div class="header">
   <h1>RetailGPT — Chat Test UI</h1>
+  <div class="customer-id-wrap">
+    <label for="customer-id-input">Customer ID</label>
+    <input id="customer-id-input" type="text" placeholder="e.g. c1" value="">
+  </div>
   <button class="btn-new" onclick="newSession()">+ New Chat</button>
   <span class="session-id" id="session-label">no session</span>
 </div>
@@ -426,7 +466,9 @@
     </div>
 
     <div class="dp-section">
-      <div class="dp-title">Raw Response</div>
+      <div class="dp-title">Request Payload</div>
+      <pre class="raw" id="v-raw-req">—</pre>
+      <div class="dp-title" style="margin-top:14px;">Response Payload</div>
       <pre class="raw" id="v-raw">—</pre>
     </div>
 
@@ -504,6 +546,14 @@ function addTyping() {
 function removeTyping() {
   const t = document.getElementById('typing-row');
   if (t) t.remove();
+}
+
+function addInfoNotice(text) {
+  const el = document.createElement('div');
+  el.className = 'info-notice';
+  el.textContent = text;
+  document.getElementById('messages').appendChild(el);
+  scrollBottom();
 }
 
 function addBotBubble(text, extraClass) {
@@ -605,6 +655,7 @@ function clearDebug() {
   document.getElementById('v-escalate').className   = 'dp-val dim';
   document.getElementById('conf-bar').style.width   = '0%';
   document.getElementById('v-entities').innerHTML   = '';
+  document.getElementById('v-raw-req').textContent  = '—';
   document.getElementById('v-raw').textContent      = '—';
 }
 
@@ -681,14 +732,18 @@ async function callTurn(message, messageType, optionId) {
   busy = true;
   setInput(false);
 
+  const customerId = document.getElementById('customer-id-input').value.trim() || null;
   const body = {
     session_id:   sessionId,
+    customer_id:  customerId,
     message:      message,
     message_type: messageType,
     option_id:    optionId || null,
     context:      context || { turn_count:0, negative_turns:0, fallback_count:0, open_handovers:[] },
     transcript:   transcript,
   };
+
+  document.getElementById('v-raw-req').textContent = JSON.stringify(body, null, 2);
 
   const typingRow = addTyping();
 
@@ -748,6 +803,13 @@ function renderBotTurn(data) {
   if (rt === 'options' && data.options?.length) {
     addOptions(data.options);
     setInput(false); // wait for option selection
+    return;
+  }
+
+  if (rt === 'options') {
+    // Options expected but none returned — show a notice and re-enable input
+    addInfoNotice('No options available. Please type your message or start a new chat.');
+    setInput(true);
     return;
   }
 

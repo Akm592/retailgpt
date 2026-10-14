@@ -1,0 +1,282 @@
+# Multi-turn quality issue flow tests
+
+- id: flow_quality_fb_stale_full
+  description: "Quality issue FB — stale food — full upload → ticket confirmation"
+  category: flow
+  subcategory: quality
+  skip_order_api: true
+  tags: [flow, quality, fb]
+  turns:
+    - turn: 1
+      description: "User reports quality issue"
+      input:
+        message: "quality issue with my food"
+        message_type: text
+      expect:
+        nlu_intent: quality_issue
+        render_type: options
+        next_context.flow_step: flow_quality_detect
+
+    - turn: 2
+      description: "Select FB category"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_quality_fb, flow_quality_fb]
+
+    - turn: 3
+      description: "Select stale issue"
+      input_requires_step: flow_quality_fb
+      input:
+        message: "stale"
+        message_type: option_select
+        option_id: stale
+      expect:
+        next_context.flow_step: flow_quality_fb_upload
+        render_type: upload
+        ticket_raised: true
+        issue_type: quality_issue_fb
+        upload_config.min_photos: 3
+        upload_config.video: true
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
+        render_type: options
+        message_contains: ticket has been raised
+
+    - turn: 5
+      description: "No agent needed, close"
+      input:
+        message: "done"
+        message_type: option_select
+        option_id: done
+      expect:
+        next_context.flow_step: flow_end
+
+  final_assertions:
+    escalate: false
+
+
+- id: flow_quality_fb_burnt
+  description: "Quality issue FB — burnt food — upload flow"
+  category: flow
+  subcategory: quality
+  skip_order_api: true
+  tags: [flow, quality, fb]
+  turns:
+    - turn: 1
+      description: "Text: food was cold (keyword)"
+      input:
+        message: "food was cold"
+        message_type: text
+      expect:
+        nlu_intent: quality_issue
+        nlu_source: keyword
+
+    - turn: 2
+      description: "Select FB"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_quality_fb, flow_quality_fb]
+
+    - turn: 3
+      description: "Select burnt"
+      input_requires_step: flow_quality_fb
+      input:
+        message: "burnt"
+        message_type: option_select
+        option_id: burnt
+      expect:
+        next_context.flow_step: flow_quality_fb_upload
+        render_type: upload
+        issue_type: quality_issue_fb
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
+        message_contains: ticket has been raised
+
+
+- id: flow_quality_fashion_wrong_size
+  description: "Quality issue Fashion — wrong size — upload → refund path"
+  category: flow
+  subcategory: quality
+  skip_order_api: true
+  tags: [flow, quality, fashion]
+  turns:
+    - turn: 1
+      description: "Text: quality issue"
+      input:
+        message: "quality issue"
+        message_type: text
+      expect:
+        nlu_intent: quality_issue
+        nlu_source: keyword
+
+    - turn: 2
+      description: "Select fashion category"
+      input:
+        message: "fashion"
+        message_type: option_select
+        option_id: fashion
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_quality_fashion, flow_quality_fashion]
+
+    - turn: 3
+      description: "Select wrong_size"
+      input_requires_step: flow_quality_fashion
+      input:
+        message: "wrong_size"
+        message_type: option_select
+        option_id: wrong_size
+      expect:
+        next_context.flow_step: flow_quality_fashion_refund
+        render_type: upload
+        issue_type: quality_issue_fashion
+        upload_config.min_photos: 3
+        upload_config.video: false
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
+
+
+- id: flow_quality_fashion_packing_only
+  description: "Quality issue Fashion — packing damaged, product good — delivery charge refund"
+  category: flow
+  subcategory: quality
+  skip_order_api: true
+  tags: [flow, quality, fashion]
+  turns:
+    - turn: 1
+      description: "Text: quality issue"
+      input:
+        message: "quality issue"
+        message_type: text
+      expect:
+        nlu_intent: quality_issue
+
+    - turn: 2
+      description: "Select fashion"
+      input:
+        message: "fashion"
+        message_type: option_select
+        option_id: fashion
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_quality_fashion, flow_quality_fashion]
+
+    - turn: 3
+      description: "Select packing_damaged"
+      input_requires_step: flow_quality_fashion
+      input:
+        message: "packing_damaged"
+        message_type: option_select
+        option_id: packing_damaged
+      expect:
+        next_context.flow_step: flow_quality_fashion_packing
+        render_type: upload
+        issue_type: quality_issue_fashion_packing
+        message_contains: Delivery Charge Refund
+
+
+- id: flow_quality_electronics_mandatory_escalation
+  description: "Quality issue Electronics — triggers mandatory escalation immediately via NLU"
+  category: flow
+  subcategory: quality
+  tags: [flow, quality, electronics, escalation]
+  turns:
+    - turn: 1
+      description: "Text: quality issue with known electronics category"
+      input:
+        message: "quality issue"
+        message_type: text
+        context:
+          category: electronics
+      expect:
+        nlu_intent: quality_issue
+        escalate: true
+        escalate_reason_contains: electronics_mandatory_escalation
+        render_type: handover
+
+  final_assertions:
+    escalate: true
+
+
+- id: flow_quality_ticket_then_agent
+  description: "Quality FB — upload complete — then request live agent"
+  category: flow
+  subcategory: quality
+  skip_order_api: true
+  tags: [flow, quality, fb, escalation]
+  turns:
+    - turn: 1
+      description: "Text: quality issue"
+      input:
+        message: "stale food"
+        message_type: text
+      expect:
+        nlu_intent: quality_issue
+        nlu_source: keyword
+
+    - turn: 2
+      description: "Select FB"
+      input:
+        message: "fb"
+        message_type: option_select
+        option_id: fb
+      expect:
+        next_context.flow_step_oneof: [flow_order_select_quality_fb, flow_quality_fb]
+
+    - turn: 3
+      description: "Select taste issue"
+      input_requires_step: flow_quality_fb
+      input:
+        message: "taste"
+        message_type: option_select
+        option_id: taste
+      expect:
+        render_type: upload
+
+    - turn: 4
+      description: "Complete upload"
+      input:
+        message: "Photos uploaded"
+        message_type: upload_complete
+        option_id: upload_complete
+      expect:
+        next_context.flow_step: flow_ticket_confirmed
+        options_include_id: [agent, done]
+
+    - turn: 5
+      description: "Request live agent"
+      input:
+        message: "agent"
+        message_type: option_select
+        option_id: agent
+      expect:
+        escalate: true
+        render_type: handover
+
+  final_assertions:
+    escalate: true
